@@ -1,0 +1,95 @@
+FUNCTION setupFirebase()
+    INITIALIZE Firebase with config
+    SETUP Firebase Authentication
+    SETUP Firestore Database
+    SETUP Firebase Storage
+END FUNCTION
+
+FUNCTION registerUser(email, password)
+    CALL Firebase Authentication to register user
+    IF registration successful THEN
+        REDIRECT to login page
+    ELSE
+        DISPLAY error message
+    END IF
+END FUNCTION
+
+FUNCTION loginUser(email, password)
+    CALL Firebase Authentication to log in user
+    IF login successful THEN
+        REDIRECT to homepage
+    ELSE
+        DISPLAY error message
+    END IF
+END FUNCTION
+
+FUNCTION protectRoute(Component)
+    IF user is authenticated THEN
+        RETURN Component
+    ELSE
+        REDIRECT to login page
+    END IF
+END FUNCTION
+
+FUNCTION fetchAccommodations()
+    CALL Firestore to get accommodation list
+    RETURN accommodation list
+END FUNCTION
+
+FUNCTION displayAccommodationDetails(accommodationId)
+    CALL Firestore to get details of accommodation by ID
+    DISPLAY accommodation details: Gallery, Map, Price, Facilities
+    DISPLAY buttons: Book, Share, Add to Favourites
+END FUNCTION
+
+FUNCTION bookAccommodation(accommodationId, bookingDetails)
+    STORE booking details in Firestore
+    IF payment successful THEN
+        DISPLAY booking confirmation
+        SEND notification to user
+    ELSE
+        DISPLAY error message
+    END IF
+END FUNCTION
+
+FUNCTION manageProfile(userId)
+    CALL Firestore to get user profile details by ID
+    DISPLAY profile details
+    ALLOW user to edit and save profile changes
+END FUNCTION
+
+FUNCTION adminAddAccommodation(accommodationData)
+    CALL Firestore to add new accommodation
+    IF add successful THEN
+        DISPLAY success message
+    ELSE
+        DISPLAY error message
+    END IF
+END FUNCTION
+
+FUNCTION adminManageReservations()
+    CALL Firestore to get reservation list
+    DISPLAY reservation list
+    ALLOW admin to approve, modify, or cancel reservations
+END FUNCTION
+
+FUNCTION searchAccommodations(filters)
+    CALL Firestore to search accommodations with filters
+    UPDATE URL with search parameters
+    DISPLAY search results
+END FUNCTION
+
+FUNCTION leaveReview(accommodationId, reviewData)
+    STORE review in Firestore under accommodation ID
+    DISPLAY success message
+END FUNCTION
+
+FUNCTION sendNotification(userId, message)
+    CALL Firebase to send notification to user by ID
+END FUNCTION
+
+FUNCTION deployApplication()
+    PUSH project to GitHub repository
+    DEPLOY on Firebase Hosting
+    RETURN public URL
+END FUNCTION
