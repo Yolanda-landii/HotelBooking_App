@@ -36,7 +36,7 @@ const BookingConfirmation = () => {
       <div className="border p-4 mb-4">
         <h3 className="text-xl font-semibold mb-2">Price Details</h3>
         <p>Room price x {nights} nights: {totalPrice.toFixed(2)} ZAR</p>
-        {/* Add more price details if needed, like service fees, etc. */}
+        {/* Add more price details if needed */}
         <p>Total: {totalPrice.toFixed(2)} ZAR</p>
       </div>
 

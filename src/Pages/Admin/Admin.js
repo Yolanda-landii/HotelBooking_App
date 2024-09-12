@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchHotels, addHotel, deleteHotel, updateHotel } from '../redux/slices/hotelSlice';
-import { storage } from '../config/firebase'; // Import Firebase storage
+import { fetchHotels, addHotel, deleteHotel, updateHotel } from '../../redux/slices/hotelSlice';
+import { storage, auth } from '../../config/firebase'; // Import Firebase storage
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'; // Firebase storage utilities
+import { signOut } from 'firebase/auth'; // Import signOut function
+import { useNavigate } from 'react-router-dom';
+
+
 
 const AdminDashboard = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { hotels, status, error } = useSelector((state) => state.hotels);
 
   const [newHotel, setNewHotel] = useState({
@@ -23,6 +28,10 @@ const AdminDashboard = () => {
     dispatch(fetchHotels());
   }, [dispatch]);
 
+  const handleLogout = async () => {
+    await signOut(auth);
+    navigate('/login'); // Redirect to login page after logout
+  };
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     if (editingHotel) {
@@ -107,6 +116,9 @@ const AdminDashboard = () => {
   return (
     <div className="p-4">
       <h2 className="text-2xl font-bold mb-4">Admin Dashboard</h2>
+      <button onClick={handleLogout} className="bg-red-500 text-white px-4 py-2 rounded">
+          Logout
+        </button> {/* Admin Logout Button */}
 
       {/* Add Hotel Form */}
       <div className="mb-6 p-4 bg-gray-100 rounded shadow">

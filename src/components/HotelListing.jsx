@@ -3,7 +3,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchHotels } from '../redux/slices/hotelSlice';
 import { useNavigate } from 'react-router-dom';
 import { collection, onSnapshot } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db, auth } from '../config/firebase';
+import { signOut } from 'firebase/auth';
+import { FaHeart, FaShareAlt, FaStar } from 'react-icons/fa'; // For icons
+import { MdLocationOn } from 'react-icons/md';
 
 const HotelListing = () => {
   const dispatch = useDispatch();
@@ -33,6 +36,22 @@ const HotelListing = () => {
     setSortOption(e.target.value);
   };
 
+  const handleLogout = async () => {
+    await signOut(auth);
+    navigate('/login'); // Redirect to login page after logout
+  };
+  // const handleShare = (hotelId) => {
+  //   if (navigator.share) {
+  //     navigator.share({
+  //       title: 'Check out this hotel!',
+  //       url: `http://your-app-url/hotel-details/${hotelId}`,
+  //     }).catch((error) => console.log('Error sharing:', error));
+  //   } else {
+  //     alert('Share functionality is not supported on this browser.');
+  //   }
+  // };
+  
+
   const sortedHotels = [...hotels].sort((a, b) => {
     if (sortOption === 'Price') {
       return a.price - b.price;
@@ -43,8 +62,17 @@ const HotelListing = () => {
   });
 
   const handleViewDetails = (hotelId) => {
-    
     navigate(`/hotel-details/${hotelId}`);
+  };
+
+  const handleLike = (hotelId) => {
+    // Implement like functionality here
+    console.log(`Liked hotel with ID: ${hotelId}`);
+  };
+
+  const handleShare = (hotelId) => {
+    // Implement share functionality here
+    console.log(`Shared hotel with ID: ${hotelId}`);
   };
 
   if (loading) return <p>Loading...</p>;
@@ -52,59 +80,67 @@ const HotelListing = () => {
 
   return (
     <div className="hotel-listing">
-  
-      <header className="header flex justify-between items-center p-4 bg-gray-100">
+      <header className="header flex justify-between items-center p-4 bg-gray-900 text-white">
         <div className="logo">
-          <img src="/path/to/logo.png" alt="Logo" />
+          <img src="/path/to/logo.png" alt="Logo" className="w-24 h-auto" />
         </div>
         <nav className="nav">
-          <ul className="flex space-x-4">
-            <li><a href="/">Home</a></li>
-            <li><a href="/rooms">Rooms</a></li>
-            <li><a href="/admin">Admin</a></li>
-            <li><a href="/profile">Profile</a></li>
-            <li className="user-info">Yolanda - Online</li>
+          <ul className="flex space-x-6">
+            <li><a href="/" className="hover:underline">Home</a></li>
+            <li><a href="/rooms" className="hover:underline">Rooms</a></li>
+            <li><a href="/profile" className="hover:underline">Profile</a></li>
+            <li><button onClick={handleLogout} className="hover:underline">Logout</button></li>
           </ul>
         </nav>
       </header>
       {/* Search/Filter Section */}
-      <section className="search-filter bg-white p-6 shadow-md">
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center space-x-4">
-            <input type="text" placeholder="Where?" className="input-field p-2 border rounded-md" />
-            <input type="date" className="input-field p-2 border rounded-md" />
-            <button className="search-btn p-2 bg-blue-500 text-white rounded-md">Check-in - Check-out</button>
+      <section className="search-filter bg-white p-6 shadow-md border border-gray-200">
+        <div className="flex flex-col sm:flex-row sm:justify-between mb-6">
+          <div className="flex flex-col sm:flex-row sm:space-x-4">
+            <input type="text" placeholder="Where?" className="input-field p-3 border border-gray-300 rounded-md shadow-sm mb-3 sm:mb-0" />
+            <input type="date" className="input-field p-3 border border-gray-300 rounded-md shadow-sm" />
+            <button className="search-btn p-3 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700">Check-in - Check-out</button>
           </div>
-          <div className="sort">
-            <select className="sort-dropdown p-2 border rounded-md" value={sortOption} onChange={handleSortChange}>
+          <div className="sort mt-4 sm:mt-0">
+            <select className="sort-dropdown p-3 border border-gray-300 rounded-md shadow-sm" value={sortOption} onChange={handleSortChange}>
               <option value="">Sort by:</option>
               <option value="Price">Price</option>
               <option value="Rating">Rating</option>
             </select>
           </div>
         </div>
-        <div className="location-info mb-4">
-          <h2 className="text-lg font-bold">Pretoria: {hotels.length} hotels found</h2>
+        <div className="location-info mb-6">
+          <h2 className="text-lg font-semibold text-gray-700">
+            Pretoria: {hotels.length} hotels found
+          </h2>
         </div>
       </section>
-      <section className="hotel-grid grid grid-cols-3 gap-4 p-6">
+      <section className="hotel-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
         {sortedHotels.map((hotel) => (
-          <div key={hotel.id} className="hotel-card bg-white p-4 shadow-lg rounded-md">
-            <img src={hotel.imageUrl} alt={hotel.name} className="hotel-image w-full h-48 object-cover rounded-md" />
-            <h3 className="hotel-name text-xl font-bold mt-4">{hotel.name}</h3>
-            <p className="hotel-price text-lg mt-2">{hotel.price}</p>
-            <p className="hotel-distance text-sm text-gray-500">{hotel.distance} km away</p>
-            <div className="flex justify-between items-center mt-4">
-              <button className="add-to-favorites">
-                <i className="heart-icon"></i>
+          <div key={hotel.id} className="hotel-card bg-white p-4 shadow-lg rounded-md border border-gray-200">
+            <img src={hotel.imageUrl} alt={hotel.name} className="hotel-image w-full h-48 object-cover rounded-md mb-4" />
+            <h3 className="hotel-name text-xl font-bold">{hotel.name}</h3>
+            <p className="hotel-price text-lg text-blue-600 mt-2">R{hotel.price}</p>
+            <p className="hotel-distance text-sm text-gray-500 mt-1"><MdLocationOn className="inline mr-1" />{hotel.distance} km away</p>
+            <div className="flex items-center mt-3">
+              <button className="like-button text-red-500 hover:text-red-600" onClick={() => handleLike(hotel.id)}>
+                <FaHeart className="w-6 h-6" />
               </button>
-              <button 
-                className="view-details p-2 bg-blue-500 text-white rounded-md"
-                onClick={() => handleViewDetails(hotel.id)} 
-              >
-                View Details
+              <button className="share-button text-blue-500 hover:text-blue-600 ml-4" onClick={() => handleShare(hotel.id)}>
+                <FaShareAlt className="w-6 h-6" />
               </button>
+              <div className="rating flex items-center ml-auto">
+                {[...Array(5)].map((_, index) => (
+                  <FaStar key={index} className={`w-5 h-5 ${index < hotel.rating ? 'text-yellow-500' : 'text-gray-300'}`} />
+                ))}
+              </div>
             </div>
+            <button 
+              className="view-details-btn mt-4 p-2 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700 w-full"
+              onClick={() => handleViewDetails(hotel.id)} 
+            >
+              View Details
+            </button>
           </div>
         ))}
       </section>

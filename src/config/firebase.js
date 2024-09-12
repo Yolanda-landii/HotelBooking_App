@@ -22,4 +22,4 @@ const storage = getStorage(app);
 const functions = getFunctions(app);  
 
 
-export { auth, db, storage, functions }; 
+export { auth, db, storage, functions}; 

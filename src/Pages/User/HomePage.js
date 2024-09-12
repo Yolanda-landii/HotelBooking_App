@@ -1,6 +1,6 @@
 import React from 'react';
 // import AccommodationList from '../components/AccommodationList';
-import HotelListing from '../components/HotelListing';
+import HotelListing from '../../components/HotelListing';
 
 function HomePage() {
   return (
