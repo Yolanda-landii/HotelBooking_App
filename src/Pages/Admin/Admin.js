@@ -6,8 +6,6 @@ import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'; //
 import { signOut } from 'firebase/auth'; // Import signOut function
 import { useNavigate } from 'react-router-dom';
 
-
-
 const AdminDashboard = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -18,10 +16,13 @@ const AdminDashboard = () => {
     price: '',
     imageUrl: '',
     distance: '',
+    roomType: '',
+    capacity: '',
+    availability: '',
   });
+  
   const [imageFile, setImageFile] = useState(null); // For storing the selected image file
   const [uploading, setUploading] = useState(false); // Track uploading state
-
   const [editingHotel, setEditingHotel] = useState(null); // Stores the currently editing hotel
 
   useEffect(() => {
@@ -32,6 +33,7 @@ const AdminDashboard = () => {
     await signOut(auth);
     navigate('/login'); // Redirect to login page after logout
   };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     if (editingHotel) {
@@ -56,9 +58,7 @@ const AdminDashboard = () => {
 
       uploadTask.on(
         'state_changed',
-        (snapshot) => {
-          // Optional: You can add a progress indicator here
-        },
+        (snapshot) => {},
         (error) => {
           console.error('Upload failed:', error);
           setUploading(false);
@@ -86,7 +86,15 @@ const AdminDashboard = () => {
     }
 
     dispatch(addHotel(newHotel));
-    setNewHotel({ name: '', price: '', imageUrl: '', distance: '' });
+    setNewHotel({
+      name: '',
+      price: '',
+      imageUrl: '',
+      distance: '',
+      roomType: '',
+      capacity: '',
+      availability: '',
+    });
     setImageFile(null);
   };
 
@@ -95,7 +103,7 @@ const AdminDashboard = () => {
   };
 
   const handleEditHotel = (id) => {
-    const hotelToEdit = hotels.find(hotel => hotel.id === id);
+    const hotelToEdit = hotels.find((hotel) => hotel.id === id);
     setEditingHotel(hotelToEdit);
   };
 
@@ -117,8 +125,8 @@ const AdminDashboard = () => {
     <div className="p-4">
       <h2 className="text-2xl font-bold mb-4">Admin Dashboard</h2>
       <button onClick={handleLogout} className="bg-red-500 text-white px-4 py-2 rounded">
-          Logout
-        </button> {/* Admin Logout Button */}
+        Logout
+      </button>
 
       {/* Add Hotel Form */}
       <div className="mb-6 p-4 bg-gray-100 rounded shadow">
@@ -142,10 +150,26 @@ const AdminDashboard = () => {
           />
           <input
             type="text"
-            name="distance"
-            placeholder="Distance"
+            name="roomType"
+            placeholder="Room Type"
             onChange={handleInputChange}
-            value={newHotel.distance}
+            value={newHotel.roomType}
+            className="p-2 border border-gray-300 rounded"
+          />
+          <input
+            type="number"
+            name="capacity"
+            placeholder="Capacity"
+            onChange={handleInputChange}
+            value={newHotel.capacity}
+            className="p-2 border border-gray-300 rounded"
+          />
+          <input
+            type="text"
+            name="availability"
+            placeholder="Availability"
+            onChange={handleInputChange}
+            value={newHotel.availability}
             className="p-2 border border-gray-300 rounded"
           />
 

@@ -2,16 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchHotels } from '../redux/slices/hotelSlice';
 import { useNavigate } from 'react-router-dom';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, doc, getDoc, updateDoc, onSnapshot } from 'firebase/firestore';
 import { db, auth } from '../config/firebase';
 import { signOut } from 'firebase/auth';
-import { FaHeart, FaShareAlt, FaStar } from 'react-icons/fa'; // For icons
+import { FaHeart, FaRegHeart, FaShareAlt, FaStar } from 'react-icons/fa'; // For icons
 import { MdLocationOn } from 'react-icons/md';
+import { updateFavorites } from '../redux/slices/userSlice'; // Import the updateFavorites action
 
 const HotelListing = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { hotels, loading, error } = useSelector((state) => state.hotels);
+  const user = useSelector((state) => state.user.user); // Accessing user state correctly
   const [sortOption, setSortOption] = useState(''); // For sorting
 
   useEffect(() => {
@@ -20,7 +22,7 @@ const HotelListing = () => {
 
     // Set up real-time listener
     const unsubscribe = onSnapshot(collection(db, 'hotels'), (snapshot) => {
-      const updatedHotels = snapshot.docs.map(doc => ({
+      const updatedHotels = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
@@ -40,17 +42,49 @@ const HotelListing = () => {
     await signOut(auth);
     navigate('/login'); // Redirect to login page after logout
   };
-  // const handleShare = (hotelId) => {
-  //   if (navigator.share) {
-  //     navigator.share({
-  //       title: 'Check out this hotel!',
-  //       url: `http://your-app-url/hotel-details/${hotelId}`,
-  //     }).catch((error) => console.log('Error sharing:', error));
-  //   } else {
-  //     alert('Share functionality is not supported on this browser.');
-  //   }
-  // };
-  
+
+  const handleLike = async (hotelId) => {
+    if (!user) {
+      alert('You need to be logged in to like a hotel');
+      return;
+    }
+
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      const userDoc = await getDoc(userRef); // Correct Firestore method
+      const userFavorites = userDoc.data()?.favorites || [];
+      const isFavorite = userFavorites.includes(hotelId);
+
+      // Update Firestore
+      await updateDoc(userRef, {
+        favorites: isFavorite
+          ? userFavorites.filter((id) => id !== hotelId) // Remove from favorites
+          : [...userFavorites, hotelId], // Add to favorites
+      });
+
+      // Update Redux state
+      dispatch(updateFavorites(isFavorite
+        ? userFavorites.filter((id) => id !== hotelId)
+        : [...userFavorites, hotelId]));
+
+      console.log(isFavorite ? `Removed hotel ${hotelId} from favorites` : `Added hotel ${hotelId} to favorites`);
+    } catch (error) {
+      console.error('Error liking hotel: ', error);
+    }
+  };
+
+  const handleShare = (hotelId) => {
+    const hotelUrl = `http://your-app-url/hotel-details/${hotelId}`;
+
+    if (navigator.share) {
+      navigator.share({
+        title: 'Check out this hotel!',
+        url: hotelUrl,
+      }).catch((error) => console.log('Error sharing:', error));
+    } else {
+      alert('Sharing is not supported on this browser.');
+    }
+  };
 
   const sortedHotels = [...hotels].sort((a, b) => {
     if (sortOption === 'Price') {
@@ -58,21 +92,11 @@ const HotelListing = () => {
     } else if (sortOption === 'Rating') {
       return b.rating - a.rating; // Assuming you have a rating field
     }
-    return 0; 
+    return 0;
   });
 
   const handleViewDetails = (hotelId) => {
     navigate(`/hotel-details/${hotelId}`);
-  };
-
-  const handleLike = (hotelId) => {
-    // Implement like functionality here
-    console.log(`Liked hotel with ID: ${hotelId}`);
-  };
-
-  const handleShare = (hotelId) => {
-    // Implement share functionality here
-    console.log(`Shared hotel with ID: ${hotelId}`);
   };
 
   if (loading) return <p>Loading...</p>;
@@ -87,19 +111,18 @@ const HotelListing = () => {
         <nav className="nav">
           <ul className="flex space-x-6">
             <li><a href="/" className="hover:underline">Home</a></li>
-            <li><a href="/rooms" className="hover:underline">Rooms</a></li>
             <li><a href="/profile" className="hover:underline">Profile</a></li>
             <li><button onClick={handleLogout} className="hover:underline">Logout</button></li>
           </ul>
         </nav>
       </header>
+
       {/* Search/Filter Section */}
       <section className="search-filter bg-white p-6 shadow-md border border-gray-200">
         <div className="flex flex-col sm:flex-row sm:justify-between mb-6">
           <div className="flex flex-col sm:flex-row sm:space-x-4">
             <input type="text" placeholder="Where?" className="input-field p-3 border border-gray-300 rounded-md shadow-sm mb-3 sm:mb-0" />
-            <input type="date" className="input-field p-3 border border-gray-300 rounded-md shadow-sm" />
-            <button className="search-btn p-3 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700">Check-in - Check-out</button>
+            <button className="search-btn p-3 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700">Search</button>
           </div>
           <div className="sort mt-4 sm:mt-0">
             <select className="sort-dropdown p-3 border border-gray-300 rounded-md shadow-sm" value={sortOption} onChange={handleSortChange}>
@@ -115,6 +138,8 @@ const HotelListing = () => {
           </h2>
         </div>
       </section>
+
+      {/* Hotel Grid Section */}
       <section className="hotel-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
         {sortedHotels.map((hotel) => (
           <div key={hotel.id} className="hotel-card bg-white p-4 shadow-lg rounded-md border border-gray-200">
@@ -124,7 +149,11 @@ const HotelListing = () => {
             <p className="hotel-distance text-sm text-gray-500 mt-1"><MdLocationOn className="inline mr-1" />{hotel.distance} km away</p>
             <div className="flex items-center mt-3">
               <button className="like-button text-red-500 hover:text-red-600" onClick={() => handleLike(hotel.id)}>
-                <FaHeart className="w-6 h-6" />
+                {user?.favorites?.includes(hotel.id) ? ( // Safe check for user and favorites
+                  <FaHeart className="w-6 h-6 text-red-500" />
+                ) : (
+                  <FaRegHeart className="w-6 h-6 text-gray-400" />
+                )}
               </button>
               <button className="share-button text-blue-500 hover:text-blue-600 ml-4" onClick={() => handleShare(hotel.id)}>
                 <FaShareAlt className="w-6 h-6" />
@@ -144,6 +173,7 @@ const HotelListing = () => {
           </div>
         ))}
       </section>
+
       <footer className="footer bg-gray-800 text-white p-4 text-center">
         <p>Copyright © 2024 Hotel Booking</p>
       </footer>

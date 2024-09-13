@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { updateProfile } from '../../utils/firabaseUtils';
+import { updateProfile } from '../../utils/firabaseUtils'; // Ensure you have a function to handle profile updates
 
 export const updateUserProfile = createAsyncThunk(
   'user/updateUserProfile',
@@ -12,6 +12,7 @@ export const updateUserProfile = createAsyncThunk(
     }
   }
 );
+
 const userSlice = createSlice({
   name: 'user',
   initialState: {
@@ -26,11 +27,11 @@ const userSlice = createSlice({
     },
     loginSuccess(state, action) {
       state.loading = false;
-      // Store UID, email, and role
       state.user = {
         uid: action.payload.uid,
         email: action.payload.email,
-        role: action.payload.role, // Add role here
+        role: action.payload.role,
+        favorites: action.payload.favorites || [], // Initialize favorites
       };
     },
     loginFailure(state, action) {
@@ -43,30 +44,35 @@ const userSlice = createSlice({
     },
     registerSuccess(state, action) {
       state.loading = false;
-      // Store UID, email, and role
       state.user = {
         uid: action.payload.uid,
         email: action.payload.email,
-        role: action.payload.role, // Add role here
+        role: action.payload.role,
+        favorites: action.payload.favorites || [], // Initialize favorites
       };
     },
     registerFailure(state, action) {
       state.loading = false;
       state.error = action.payload;
     },
+    updateFavorites(state, action) {
+      if (state.user) {
+        state.user.favorites = action.payload; // Update favorites
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
       .addCase(updateUserProfile.pending, (state) => {
-        state.status = 'loading';
+        state.loading = true;
         state.error = null;
       })
       .addCase(updateUserProfile.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.user = action.payload;
+        state.loading = false;
+        state.user = { ...state.user, ...action.payload }; // Merge profile updates with user state
       })
       .addCase(updateUserProfile.rejected, (state, action) => {
-        state.status = 'failed';
+        state.loading = false;
         state.error = action.payload;
       });
   },
@@ -79,6 +85,7 @@ export const {
   registerRequest,
   registerSuccess,
   registerFailure,
+  updateFavorites, // Export the new reducer
 } = userSlice.actions;
 
 export default userSlice.reducer;
