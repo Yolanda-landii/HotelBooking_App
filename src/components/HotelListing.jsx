@@ -15,6 +15,7 @@ const HotelListing = () => {
   const { hotels, loading, error } = useSelector((state) => state.hotels);
   const user = useSelector((state) => state.user.user); // Accessing user state correctly
   const [sortOption, setSortOption] = useState(''); // For sorting
+  const [rating, setRating] = useState({}); // Local state for hotel ratings
 
   useEffect(() => {
     // Fetch hotels on component mount
@@ -27,6 +28,13 @@ const HotelListing = () => {
         ...doc.data(),
       }));
       dispatch({ type: 'hotels/fetchHotels/fulfilled', payload: updatedHotels });
+
+      // Initialize rating state
+      const ratings = {};
+      updatedHotels.forEach((hotel) => {
+        ratings[hotel.id] = hotel.rating || 0;
+      });
+      setRating(ratings);
     });
 
     // Cleanup listener on unmount
@@ -51,18 +59,16 @@ const HotelListing = () => {
 
     try {
       const userRef = doc(db, 'users', user.uid);
-      const userDoc = await getDoc(userRef); // Correct Firestore method
+      const userDoc = await getDoc(userRef);
       const userFavorites = userDoc.data()?.favorites || [];
       const isFavorite = userFavorites.includes(hotelId);
 
-      // Update Firestore
       await updateDoc(userRef, {
         favorites: isFavorite
-          ? userFavorites.filter((id) => id !== hotelId) // Remove from favorites
-          : [...userFavorites, hotelId], // Add to favorites
+          ? userFavorites.filter((id) => id !== hotelId)
+          : [...userFavorites, hotelId],
       });
 
-      // Update Redux state
       dispatch(updateFavorites(isFavorite
         ? userFavorites.filter((id) => id !== hotelId)
         : [...userFavorites, hotelId]));
@@ -86,11 +92,26 @@ const HotelListing = () => {
     }
   };
 
+  const handleRatingClick = async (hotelId, newRating) => {
+    try {
+      // Update local state
+      setRating(prevRating => ({ ...prevRating, [hotelId]: newRating }));
+
+      // Update Firestore
+      const hotelRef = doc(db, 'hotels', hotelId);
+      await updateDoc(hotelRef, { rating: newRating });
+
+      console.log(`Updated hotel ${hotelId} rating to ${newRating}`);
+    } catch (error) {
+      console.error('Error updating rating: ', error);
+    }
+  };
+
   const sortedHotels = [...hotels].sort((a, b) => {
     if (sortOption === 'Price') {
       return a.price - b.price;
     } else if (sortOption === 'Rating') {
-      return b.rating - a.rating; // Assuming you have a rating field
+      return b.rating - a.rating;
     }
     return 0;
   });
@@ -149,7 +170,7 @@ const HotelListing = () => {
             <p className="hotel-distance text-sm text-gray-500 mt-1"><MdLocationOn className="inline mr-1" />{hotel.distance} km away</p>
             <div className="flex items-center mt-3">
               <button className="like-button text-red-500 hover:text-red-600" onClick={() => handleLike(hotel.id)}>
-                {user?.favorites?.includes(hotel.id) ? ( // Safe check for user and favorites
+                {user?.favorites?.includes(hotel.id) ? (
                   <FaHeart className="w-6 h-6 text-red-500" />
                 ) : (
                   <FaRegHeart className="w-6 h-6 text-gray-400" />
@@ -160,7 +181,11 @@ const HotelListing = () => {
               </button>
               <div className="rating flex items-center ml-auto">
                 {[...Array(5)].map((_, index) => (
-                  <FaStar key={index} className={`w-5 h-5 ${index < hotel.rating ? 'text-yellow-500' : 'text-gray-300'}`} />
+                  <FaStar
+                    key={index}
+                    className={`w-5 h-5 ${index < (rating[hotel.id] || 0) ? 'text-yellow-500' : 'text-gray-300'} cursor-pointer`}
+                    onClick={() => handleRatingClick(hotel.id, index + 1)}
+                  />
                 ))}
               </div>
             </div>

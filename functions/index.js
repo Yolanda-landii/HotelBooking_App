@@ -1,6 +1,6 @@
 const { onCall } = require('firebase-functions/v2/https');
 const logger = require('firebase-functions/logger');
-const stripe = require('stripe')('pk_test_TYooMQauvdEDq54NiTphI7jx'); // Replace with your actual Stripe secret key
+const stripe = require('stripe')('pk_test_51PyWUREMz50nif55fK8C9cxOdEly9YE9oI3FSiPamkRbdehoxGezQa8sunPYYuqKDmwZPKhsmqZDeBOSmgkZPhhg00hcETCYXE'); // Replace with your actual Stripe secret key
 
 // Cloud Function to create a payment intent using Stripe
 exports.createPaymentIntent = onCall(async (data, context) => {
