@@ -8,6 +8,7 @@ import HotelDetail from './components/HotelDetails';
 import AdminDashboard from './Pages/Admin/Admin';
 import BookingConfirmation from './components/BookingConfirmation';
 import Profile from './Pages/User/UserProfile';
+import Reservations from './Pages/Admin/Reservations';
 
 function App() {
   // const { currentUser } = useAuth();
@@ -33,14 +34,13 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         
         {/* Admin Side Routes */}
-        <Route 
-          path="/admin" 
-          element={
+        <Route path="/admin" element={
             <AdminPrivateRoute>
               <AdminDashboard />
             </AdminPrivateRoute>
           } 
         />
+        <Route path='/reservations' element={<Reservations />} />
       </Routes>
     </Router>
   );

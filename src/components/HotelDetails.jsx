@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../config/firebase';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { db, auth } from '../config/firebase';
+import { signOut } from 'firebase/auth';
 import { useDispatch, useSelector } from 'react-redux';
 import { createBooking, selectBookingStatus, selectBookingError } from '../redux/slices/bookingSlice';
 
@@ -32,6 +33,10 @@ const HotelDetail = () => {
   const [showGuestDropdown, setShowGuestDropdown] = useState(false);
   const [totalPrice, setTotalPrice] = useState(0);
 
+  const handleLogout = async () => {
+    await signOut(auth);
+    navigate('/login'); // Redirect to login page after logout
+  };
   // Fetch hotel details from Firebase
   useEffect(() => {
     const fetchHotelDetails = async () => {
@@ -128,16 +133,15 @@ const HotelDetail = () => {
 
   return (
     <div className="hotel-detail">
-      {/* Header */}
-      <header className="header flex justify-between items-center p-4 bg-gray-800 text-white">
+      <header className="header flex justify-between items-center p-4 bg-gray-900 text-white">
         <div className="logo">
-          <img src="/path/to/logo.png" alt="Logo" />
+          <img src="/path/to/logo.png" alt="Logo" className="w-24 h-auto" />
         </div>
         <nav className="nav">
-          <ul className="flex space-x-4">
-            <li><a href="/">Home</a></li>
-            <li><a href="/rooms">Rooms</a></li>
-            <li><a href="/profile">Profile</a></li>
+          <ul className="flex space-x-6">
+            <li><a href="/" className="hover:underline">Home</a></li>
+            <li><a href="/profile" className="hover:underline">Profile</a></li>
+            <li><button onClick={handleLogout} className="hover:underline">Logout</button></li>
           </ul>
         </nav>
       </header>

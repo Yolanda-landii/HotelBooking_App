@@ -1,11 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { getDocs, collection, query, where, addDoc } from 'firebase/firestore';
 import { db } from '../../config/firebase';
-// import { getUserProfile, updateProfile } from '../../utils/firebaseUtils';
 
 const initialState = {
   status: 'idle',
   error: null,
+  bookings: [], // Initialize bookings state
 };
 
 export const fetchUserBookings = createAsyncThunk(
@@ -21,18 +21,31 @@ export const fetchUserBookings = createAsyncThunk(
     }
   }
 );
-// Async thunk for creating a booking
+
 export const createBooking = createAsyncThunk(
   'booking/createBooking',
   async (bookingData, { rejectWithValue }) => {
     try {
-      await addDoc(collection(db, 'bookings'), bookingData);
-      return bookingData;
+      const docRef = await addDoc(collection(db, 'bookings'), bookingData);
+      return { id: docRef.id, ...bookingData }; // Return the new booking with ID
     } catch (error) {
       return rejectWithValue(error.message);
     }
   }
 );
+export const fetchAllBookings = createAsyncThunk(
+  'booking/fetchAllBookings',
+  async (_, { rejectWithValue }) => {
+    try {
+      const querySnapshot = await getDocs(collection(db, 'bookings'));
+      const bookings = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      return bookings;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 
 const bookingSlice = createSlice({
   name: 'booking',
@@ -48,11 +61,36 @@ const bookingSlice = createSlice({
         state.status = 'loading';
         state.error = null;
       })
-      .addCase(createBooking.fulfilled, (state) => {
+      .addCase(createBooking.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.error = null;
+        state.bookings.push(action.payload); // Add new booking to the state
       })
       .addCase(createBooking.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload;
+      })
+      .addCase(fetchUserBookings.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(fetchUserBookings.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.bookings = action.payload; // Set bookings to fetched data
+      })
+      .addCase(fetchUserBookings.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload;
+      })
+      .addCase(fetchAllBookings.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(fetchAllBookings.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.bookings = action.payload; // Set bookings to fetched data
+      })
+      .addCase(fetchAllBookings.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload;
       });
@@ -63,5 +101,6 @@ export const { clearBookingError } = bookingSlice.actions;
 
 export const selectBookingStatus = (state) => state.booking.status;
 export const selectBookingError = (state) => state.booking.error;
+export const selectBookings = (state) => state.booking.bookings; // Selector for bookings
 
 export default bookingSlice.reducer;

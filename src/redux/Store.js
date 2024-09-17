@@ -4,6 +4,7 @@ import userReducer from './slices/userSlice';
 import hotelReducer from './slices/hotelSlice';
 import bookingReducer from './slices/bookingSlice';
 import favoritesReducer from './slices/favoritesSlice';
+import reservationsReducer from './slices/reservationsSlice';
 
 
 const store = configureStore({
@@ -12,6 +13,7 @@ const store = configureStore({
     hotels: hotelReducer,
     booking: bookingReducer,
     favorites: favoritesReducer,
+    reservations:reservationsReducer,
     
   },
   // Disable the non-serializable value check (not recommended)

@@ -141,10 +141,10 @@ const HotelListing = () => {
       {/* Search/Filter Section */}
       <section className="search-filter bg-white p-6 shadow-md border border-gray-200">
         <div className="flex flex-col sm:flex-row sm:justify-between mb-6">
-          <div className="flex flex-col sm:flex-row sm:space-x-4">
-            <input type="text" placeholder="Where?" className="input-field p-3 border border-gray-300 rounded-md shadow-sm mb-3 sm:mb-0" />
-            <button className="search-btn p-3 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700">Search</button>
-          </div>
+          {/* <div className="flex flex-col sm:flex-row sm:space-x-4"> */}
+            {/* <input type="text" placeholder="Where?" className="input-field p-3 border border-gray-300 rounded-md shadow-sm mb-3 sm:mb-0" />
+            <button className="search-btn p-3 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700">Search</button> */}
+          {/* </div> */}
           <div className="sort mt-4 sm:mt-0">
             <select className="sort-dropdown p-3 border border-gray-300 rounded-md shadow-sm" value={sortOption} onChange={handleSortChange}>
               <option value="">Sort by:</option>
@@ -161,43 +161,46 @@ const HotelListing = () => {
       </section>
 
       {/* Hotel Grid Section */}
-      <section className="hotel-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-        {sortedHotels.map((hotel) => (
-          <div key={hotel.id} className="hotel-card bg-white p-4 shadow-lg rounded-md border border-gray-200">
-            <img src={hotel.imageUrl} alt={hotel.name} className="hotel-image w-full h-48 object-cover rounded-md mb-4" />
-            <h3 className="hotel-name text-xl font-bold">{hotel.name}</h3>
-            <p className="hotel-price text-lg text-blue-600 mt-2">R{hotel.price}</p>
-            <p className="hotel-distance text-sm text-gray-500 mt-1"><MdLocationOn className="inline mr-1" />{hotel.distance} km away</p>
-            <div className="flex items-center mt-3">
-              <button className="like-button text-red-500 hover:text-red-600" onClick={() => handleLike(hotel.id)}>
-                {user?.favorites?.includes(hotel.id) ? (
-                  <FaHeart className="w-6 h-6 text-red-500" />
-                ) : (
-                  <FaRegHeart className="w-6 h-6 text-gray-400" />
-                )}
-              </button>
-              <button className="share-button text-blue-500 hover:text-blue-600 ml-4" onClick={() => handleShare(hotel.id)}>
-                <FaShareAlt className="w-6 h-6" />
-              </button>
-              <div className="rating flex items-center ml-auto">
-                {[...Array(5)].map((_, index) => (
-                  <FaStar
-                    key={index}
-                    className={`w-5 h-5 ${index < (rating[hotel.id] || 0) ? 'text-yellow-500' : 'text-gray-300'} cursor-pointer`}
-                    onClick={() => handleRatingClick(hotel.id, index + 1)}
-                  />
-                ))}
-              </div>
-            </div>
-            <button 
-              className="view-details-btn mt-4 p-2 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700 w-full"
-              onClick={() => handleViewDetails(hotel.id)} 
-            >
-              View Details
-            </button>
-          </div>
-        ))}
-      </section>
+      <section className="hotel-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6">
+  {sortedHotels.map((hotel) => (
+    <div key={hotel.id} className="hotel-card bg-white p-4 shadow-lg rounded-md border border-gray-200">
+      <img src={hotel.imageUrl} alt={hotel.name} className="hotel-image w-full h-48 object-cover rounded-md mb-4" />
+      <h3 className="hotel-name text-xl font-bold">{hotel.name}</h3>
+      <p className="hotel-price text-lg text-blue-600 mt-2">R{hotel.price}</p>
+      <p className="hotel-distance text-sm text-gray-500 mt-1">
+        <MdLocationOn className="inline mr-1" />
+        {hotel.distance} km away
+      </p>
+      <div className="flex items-center mt-3">
+        <button className="like-button text-red-500 hover:text-red-600" onClick={() => handleLike(hotel.id)}>
+          {user?.favorites?.includes(hotel.id) ? (
+            <FaHeart className="w-6 h-6 text-red-500" />
+          ) : (
+            <FaRegHeart className="w-6 h-6 text-gray-400" />
+          )}
+        </button>
+        <button className="share-button text-blue-500 hover:text-blue-600 ml-4" onClick={() => handleShare(hotel.id)}>
+          <FaShareAlt className="w-6 h-6" />
+        </button>
+        <div className="rating flex items-center ml-auto">
+          {[...Array(5)].map((_, index) => (
+            <FaStar
+              key={index}
+              className={`w-5 h-5 ${index < (rating[hotel.id] || 0) ? 'text-yellow-500' : 'text-gray-300'} cursor-pointer`}
+              onClick={() => handleRatingClick(hotel.id, index + 1)}
+            />
+          ))}
+        </div>
+      </div>
+      <button
+        className="view-details-btn mt-4 p-2 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700 w-full"
+        onClick={() => handleViewDetails(hotel.id)}
+      >
+        View Details
+      </button>
+    </div>
+  ))}
+</section>
 
       <footer className="footer bg-gray-800 text-white p-4 text-center">
         <p>Copyright © 2024 Hotel Booking</p>
