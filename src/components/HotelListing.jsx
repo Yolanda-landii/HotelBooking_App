@@ -127,7 +127,7 @@ const HotelListing = () => {
     <div className="hotel-listing">
       <header className="header flex justify-between items-center p-4 bg-gray-900 text-white">
         <div className="logo">
-          <img src="/path/to/logo.png" alt="Logo" className="w-24 h-auto" />
+          <img src="/images/logo.png" alt="Logo" className="w-24 h-auto" />
         </div>
         <nav className="nav">
           <ul className="flex space-x-6">

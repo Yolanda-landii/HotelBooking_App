@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { getDocs, collection, query, where, addDoc } from 'firebase/firestore';
+import { getDocs, collection, query, where, addDoc, doc, getDoc } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 
 const initialState = {
@@ -37,14 +37,33 @@ export const fetchAllBookings = createAsyncThunk(
   'booking/fetchAllBookings',
   async (_, { rejectWithValue }) => {
     try {
+      // Fetch all bookings
       const querySnapshot = await getDocs(collection(db, 'bookings'));
-      const bookings = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const bookings = await Promise.all(
+        querySnapshot.docs.map(async (bookingDoc) => {
+          const bookingData = bookingDoc.data();
+          const bookingId = bookingDoc.id;
+
+          // Fetch user details using the userId from the booking data
+          const userRef = doc(db, 'users', bookingData.userId);
+          const userSnapshot = await getDoc(userRef);
+          const userData = userSnapshot.exists() ? userSnapshot.data() : {};
+
+          return {
+            id: bookingId,
+            ...bookingData,
+            user: userData,
+          };
+        })
+      );
+
       return bookings;
     } catch (error) {
       return rejectWithValue(error.message);
     }
   }
 );
+
 
 
 const bookingSlice = createSlice({
