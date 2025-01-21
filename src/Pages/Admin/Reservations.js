@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchHotels } from '../../redux/slices/hotelSlice';
+import { fetchRooms } from '../../redux/slices/roomSlice';
 import { fetchAllBookings } from '../../redux/slices/bookingSlice';
 import { db, auth } from '../../config/firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
@@ -17,7 +17,7 @@ const Reservations = () => {
   const [bookingsWithDetails, setBookingsWithDetails] = useState([]);
 
   useEffect(() => {
-    dispatch(fetchHotels());
+    dispatch(fetchRooms());
     dispatch(fetchAllBookings());
   }, [dispatch]);
 

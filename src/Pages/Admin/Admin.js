@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchHotels, addHotel, deleteHotel, updateHotel } from '../../redux/slices/hotelSlice';
+import { fetchRooms, addRoom, deleteRoom, updateRoom } from '../../redux/slices/roomSlice';
 import { fetchAllBookings } from '../../redux/slices/bookingSlice';
 import { storage, auth } from '../../config/firebase';
-// import { doc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { signOut } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
@@ -12,25 +11,17 @@ const AdminDashboard = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const hotels = useSelector((state) => state.hotels.hotels) || [];
-  const hotelStatus = useSelector((state) => state.hotels.status);
-  const hotelError = useSelector((state) => state.hotels.error);
+  const rooms = useSelector((state) => state.rooms.rooms) || [];
+  const roomStatus = useSelector((state) => state.rooms.status);
+  const roomError = useSelector((state) => state.rooms.error);
 
-
-  const bookingStatus = useSelector((state) => state.booking.status);
-  const bookingError = useSelector((state) => state.booking.error);
-
-  const [newHotel, setNewHotel] = useState({
-    name: '', price: '', imageUrl: '', distance: '', roomType: '', capacity: '', availability: ''
-  });
-
-  const [editingHotel, setEditingHotel] = useState(null);
+  const [newRoom, setNewRoom] = useState({ roomType: '', capacity: '', price: '', availability: '', imageUrl: '' });
+  const [editingRoom, setEditingRoom] = useState(null);
   const [imageFile, setImageFile] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
 
   useEffect(() => {
-    dispatch(fetchHotels());
+    dispatch(fetchRooms());
     dispatch(fetchAllBookings());
   }, [dispatch]);
 
@@ -41,310 +32,136 @@ const AdminDashboard = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    if (editingHotel) {
-      setEditingHotel((prev) => ({ ...prev, [name]: value }));
-    } else {
-      setNewHotel((prev) => ({ ...prev, [name]: value }));
-    }
+    const targetRoom = editingRoom || newRoom;
+    const setRoom = editingRoom ? setEditingRoom : setNewRoom;
+    setRoom({ ...targetRoom, [name]: value });
   };
 
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    setImageFile(file);
+    setImageFile(e.target.files[0]);
   };
 
-  const handleUploadImage = async () => {
-    if (!imageFile) return;
-    const imageRef = ref(storage, `hotels/${imageFile.name}`);
+  const uploadImage = async (callback) => {
+    if (!imageFile) {
+      alert('Please select an image.');
+      return;
+    }
+
+    const imageRef = ref(storage, `rooms/${imageFile.name}`);
     setUploading(true);
+
     try {
       const uploadTask = uploadBytesResumable(imageRef, imageFile);
-      uploadTask.on('state_changed', () => {}, (error) => {
-        console.error('Upload failed:', error);
-        setUploading(false);
-      }, async () => {
-        const imageUrl = await getDownloadURL(uploadTask.snapshot.ref);
-        if (editingHotel) {
-          setEditingHotel((prev) => ({ ...prev, imageUrl }));
-        } else {
-          setNewHotel((prev) => ({ ...prev, imageUrl }));
+      uploadTask.on(
+        'state_changed',
+        null,
+        (error) => console.error('Upload failed:', error),
+        async () => {
+          const imageUrl = await getDownloadURL(uploadTask.snapshot.ref);
+          callback(imageUrl);
+          setUploading(false);
         }
-        setUploading(false);
-      });
+      );
     } catch (error) {
       console.error('Error uploading image:', error);
       setUploading(false);
     }
   };
 
-  const handleAddHotel = () => {
-    if (!newHotel.imageUrl) {
+  const handleAddRoom = () => {
+    if (!newRoom.imageUrl) {
       alert('Please upload an image first.');
       return;
     }
-    dispatch(addHotel(newHotel));
-    setNewHotel({ name: '', price: '', imageUrl: '', distance: '', roomType: '', capacity: '', availability: '' });
+
+    dispatch(addRoom(newRoom));
+    setNewRoom({ roomType: '', capacity: '', price: '', availability: '', imageUrl: '' });
     setImageFile(null);
   };
 
-  const handleDeleteHotel = (id) => {
-    setShowDeleteConfirm(id);
-  };
-
-  const confirmDeleteHotel = (id) => {
-    dispatch(deleteHotel(id));
-    setShowDeleteConfirm(null);
-  };
-
-  const handleEditHotel = (id) => {
-    const hotelToEdit = hotels.find((hotel) => hotel.id === id);
-    setEditingHotel(hotelToEdit);
-  };
-
-  const handleSaveEditHotel = async () => {
-    if (!editingHotel.imageUrl) {
+  const handleSaveEditRoom = () => {
+    if (!editingRoom.imageUrl) {
       alert('Please upload an image first.');
       return;
     }
-    dispatch(updateHotel({ id: editingHotel.id, updatedData: editingHotel }));
-    setEditingHotel(null);
+
+    dispatch(updateRoom({ id: editingRoom.id, updatedData: editingRoom }));
+    setEditingRoom(null);
     setImageFile(null);
   };
 
-  
-
-  if (hotelStatus === 'loading' || bookingStatus === 'loading') return <p className="text-center py-4">Loading...</p>;
-  if (hotelStatus === 'failed') return <p className="text-center text-red-500">Error: {hotelError}</p>;
-  if (bookingStatus === 'failed') return <p className="text-center text-red-500">Error: {bookingError}</p>;
+  if (roomStatus === 'loading') return <p>Loading rooms...</p>;
+  if (roomError) return <p>Error: {roomError}</p>;
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
-      <header className="header flex justify-between items-center p-4 bg-gray-900 text-white">
-                <div className="logo">
-                <img src="/images/logo.png" alt="Logo" className="w-24 h-auto" />
-                </div>
-                <nav className="nav">
-                <ul className="flex space-x-6">
-                    <li><a href="/admin" className="hover:underline">Home</a></li>
-                    <li><a href="/reservations" className="hover:underline">Reservations</a></li>
-                    <li><button onClick={handleLogout} className="hover:underline">Logout</button></li>
-                </ul>
-                </nav>
-            </header>
+      <header className="flex justify-between items-center bg-gray-900 text-white p-4">
+        <h1>Admin Dashboard</h1>
+        <button onClick={handleLogout} className="bg-red-500 px-4 py-2 rounded">
+          Logout
+        </button>
+      </header>
 
-    
-
-      {/* Add Hotel Form */}
-      <div className="mb-8 bg-white p-6 rounded-lg shadow-lg">
-        <h3 className="text-2xl font-semibold mb-4">Add New Hotel</h3>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
-          <input
-            type="text"
-            name="name"
-            placeholder="Hotel Name"
-            onChange={handleInputChange}
-            value={newHotel.name}
-            className="p-3 border border-gray-300 rounded-lg"
-          />
-          <input
-            type="text"
-            name="price"
-            placeholder="Price"
-            onChange={handleInputChange}
-            value={newHotel.price}
-            className="p-3 border border-gray-300 rounded-lg"
-          />
-          <input
-            type="text"
-            name="roomType"
-            placeholder="Room Type"
-            onChange={handleInputChange}
-            value={newHotel.roomType}
-            className="p-3 border border-gray-300 rounded-lg"
-          />
-          <input
-            type="number"
-            name="capacity"
-            placeholder="Capacity"
-            onChange={handleInputChange}
-            value={newHotel.capacity}
-            className="p-3 border border-gray-300 rounded-lg"
-          />
-          <input
-            type="text"
-            name="availability"
-            placeholder="Availability"
-            onChange={handleInputChange}
-            value={newHotel.availability}
-            className="p-3 border border-gray-300 rounded-lg"
-          />
-          <input
-            type="text"
-            name="distance"
-            placeholder="Distance"
-            onChange={handleInputChange}
-            value={newHotel.distance}
-            className="p-3 border border-gray-300 rounded-lg"
-          />
-          <input
-            type="file"
-            onChange={handleImageChange}
-            className="col-span-1 sm:col-span-2 md:col-span-4"
-          />
-          {imageFile && (
-            <div className="col-span-1 sm:col-span-2 md:col-span-4">
-              <button
-                onClick={handleUploadImage}
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                disabled={uploading}
-              >
-                {uploading ? 'Uploading...' : 'Upload Image'}
-              </button>
-            </div>
-          )}
-          <div className="col-span-1 sm:col-span-2 md:col-span-4 flex justify-end">
-            <button
-              onClick={handleAddHotel}
-              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-            >
-              Add Hotel
-            </button>
-          </div>
-        </div>
+      {/* Add/Edit Room */}
+      <div className="p-6 bg-white rounded-lg shadow-lg mb-6">
+        <h2>{editingRoom ? 'Edit Room' : 'Add New Room'}</h2>
+        <input
+          type="text"
+          name="roomType"
+          placeholder="Room Type"
+          value={editingRoom ? editingRoom.roomType : newRoom.roomType}
+          onChange={handleInputChange}
+        />
+        <input
+          type="number"
+          name="capacity"
+          placeholder="Capacity"
+          value={editingRoom ? editingRoom.capacity : newRoom.capacity}
+          onChange={handleInputChange}
+        />
+        <input
+          type="number"
+          name="price"
+          placeholder="Price"
+          value={editingRoom ? editingRoom.price : newRoom.price}
+          onChange={handleInputChange}
+        />
+        <input
+          type="text"
+          name="availability"
+          placeholder="Availability"
+          value={editingRoom ? editingRoom.availability : newRoom.availability}
+          onChange={handleInputChange}
+        />
+        <input type="file" onChange={handleImageChange} />
+        <button
+          onClick={() => uploadImage((url) => (editingRoom ? setEditingRoom({ ...editingRoom, imageUrl: url }) : setNewRoom({ ...newRoom, imageUrl: url })))}
+          disabled={uploading}
+        >
+          {uploading ? 'Uploading...' : 'Upload Image'}
+        </button>
+        <button onClick={editingRoom ? handleSaveEditRoom : handleAddRoom}>
+          {editingRoom ? 'Save Changes' : 'Add Room'}
+        </button>
       </div>
 
-      {/* Edit Hotel Form */}
-      {editingHotel && (
-        <div className="mb-8 bg-white p-6 rounded-lg shadow-lg">
-          <h3 className="text-2xl font-semibold mb-4">Edit Hotel</h3>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
-            <input
-              type="text"
-              name="name"
-              placeholder="Hotel Name"
-              onChange={handleInputChange}
-              value={editingHotel.name}
-              className="p-3 border border-gray-300 rounded-lg"
-            />
-            <input
-              type="text"
-              name="price"
-              placeholder="Price"
-              onChange={handleInputChange}
-              value={editingHotel.price}
-              className="p-3 border border-gray-300 rounded-lg"
-            />
-            <input
-              type="text"
-              name="roomType"
-              placeholder="Room Type"
-              onChange={handleInputChange}
-              value={editingHotel.roomType}
-              className="p-3 border border-gray-300 rounded-lg"
-            />
-            <input
-              type="number"
-              name="capacity"
-              placeholder="Capacity"
-              onChange={handleInputChange}
-              value={editingHotel.capacity}
-              className="p-3 border border-gray-300 rounded-lg"
-            />
-            <input
-              type="text"
-              name="availability"
-              placeholder="Availability"
-              onChange={handleInputChange}
-              value={editingHotel.availability}
-              className="p-3 border border-gray-300 rounded-lg"
-            />
-            <input
-              type="text"
-              name="distance"
-              placeholder="Distance"
-              onChange={handleInputChange}
-              value={editingHotel.distance}
-              className="p-3 border border-gray-300 rounded-lg"
-            />
-            <input
-              type="file"
-              onChange={handleImageChange}
-              className="col-span-1 sm:col-span-2 md:col-span-4"
-            />
-            {imageFile && (
-              <div className="col-span-1 sm:col-span-2 md:col-span-4">
-                <button
-                  onClick={handleUploadImage}
-                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                  disabled={uploading}
-                >
-                  {uploading ? 'Uploading...' : 'Upload Image'}
-                </button>
-              </div>
-            )}
-            <div className="col-span-1 sm:col-span-2 md:col-span-4 flex justify-end">
-              <button
-                onClick={handleSaveEditHotel}
-                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-              >
-                Save Changes
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Hotel List */}
+      {/* Room List */}
       <div className="bg-white p-6 rounded-lg shadow-lg">
-        <h3 className="text-2xl font-semibold mb-4">Hotel List</h3>
-        {Array.isArray(hotels) && hotels.length === 0 ? (
-          <p>No hotels available.</p>
-        ) : (
-          hotels.map((hotel) => (
-            <div key={hotel.id} className="p-4 mb-4 border border-gray-200 rounded-lg shadow-sm bg-gray-50">
-              <h4 className="text-xl font-semibold">{hotel.name}</h4>
-              <p><strong>Price:</strong> {hotel.price}</p>
-              <p><strong>Room Type:</strong> {hotel.roomType}</p>
-              <p><strong>Capacity:</strong> {hotel.capacity}</p>
-              <p><strong>Availability:</strong> {hotel.availability}</p>
-              <p><strong>Distance:</strong> {hotel.distance}</p>
-              <img src={hotel.imageUrl} alt={hotel.name} className="w-full h-40 object-cover mt-2" />
-              <div className="flex gap-2 mt-4">
-                <button onClick={() => handleEditHotel(hotel.id)} className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
-                  Edit
-                </button>
-                <button onClick={() => handleDeleteHotel(hotel.id)} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
-                  Delete
-                </button>
-              </div>
+        <h2>Room List</h2>
+        {rooms.map((room) => (
+          <div key={room.id} className="flex justify-between items-center">
+            <div>
+              <h3>{room.roomType}</h3>
+              <p>Price: {room.price}</p>
+              <p>Capacity: {room.capacity}</p>
             </div>
-          ))
-        )}
-      </div>
-
-      {/* Delete Confirmation */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <h4 className="text-xl font-semibold mb-4">Confirm Delete</h4>
-            <p>Are you sure you want to delete this hotel?</p>
-            <div className="flex justify-end gap-2 mt-4">
-              <button
-                onClick={() => confirmDeleteHotel(showDeleteConfirm)}
-                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-              >
-                Yes, Delete
-              </button>
-              <button
-                onClick={() => setShowDeleteConfirm(null)}
-                className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
-              >
-                Cancel
-              </button>
+            <div>
+              <button onClick={() => setEditingRoom(room)}>Edit</button>
+              <button onClick={() => dispatch(deleteRoom(room.id))}>Delete</button>
             </div>
           </div>
-        </div>
-      )}
+        ))}
+      </div>
     </div>
   );
 };

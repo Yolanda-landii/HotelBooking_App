@@ -21,7 +21,6 @@ const BookingConfirmation = () => {
     <div className="container mx-auto p-4">
       <h2 className="text-2xl font-bold mb-4">Confirm Your Booking</h2>
 
-      {/* Booking Summary */}
       <div className="border p-4 mb-4">
         <h3 className="text-xl font-semibold mb-2">Your Trip</h3>
         <p>Hotel: {hotelName}</p>

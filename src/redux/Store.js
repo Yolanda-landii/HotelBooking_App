@@ -1,7 +1,7 @@
 // redux/store.js
 import { configureStore } from '@reduxjs/toolkit';
 import userReducer from './slices/userSlice';
-import hotelReducer from './slices/hotelSlice';
+import roomReducer from './slices/roomSlice';
 import bookingReducer from './slices/bookingSlice';
 import favoritesReducer from './slices/favoritesSlice';
 import reservationsReducer from './slices/reservationsSlice';
@@ -10,7 +10,7 @@ import reservationsReducer from './slices/reservationsSlice';
 const store = configureStore({
   reducer: {
     user: userReducer,
-    hotels: hotelReducer,
+    rooms: roomReducer,
     booking: bookingReducer,
     favorites: favoritesReducer,
     reservations:reservationsReducer,

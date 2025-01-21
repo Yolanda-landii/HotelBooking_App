@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchHotels } from '../redux/slices/hotelSlice';
+import { fetchRooms } from '../redux/slices/roomSlice';
 import { useNavigate } from 'react-router-dom';
 import { collection, doc, getDoc, updateDoc, onSnapshot } from 'firebase/firestore';
 import { db, auth } from '../config/firebase';
@@ -12,27 +12,27 @@ import { updateFavorites } from '../redux/slices/userSlice'; // Import the updat
 const HotelListing = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { hotels, loading, error } = useSelector((state) => state.hotels);
+  const { rooms, loading, error } = useSelector((state) => state.rooms);
   const user = useSelector((state) => state.user.user); // Accessing user state correctly
   const [sortOption, setSortOption] = useState(''); // For sorting
   const [rating, setRating] = useState({}); // Local state for hotel ratings
 
   useEffect(() => {
     // Fetch hotels on component mount
-    dispatch(fetchHotels());
+    dispatch(fetchRooms());
 
     // Set up real-time listener
-    const unsubscribe = onSnapshot(collection(db, 'hotels'), (snapshot) => {
-      const updatedHotels = snapshot.docs.map((doc) => ({
+    const unsubscribe = onSnapshot(collection(db, 'rooms'), (snapshot) => {
+      const updatedRooms = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-      dispatch({ type: 'hotels/fetchHotels/fulfilled', payload: updatedHotels });
+      dispatch({ type: 'rooms/fetchRooms/fulfilled', payload: updatedRooms });
 
       // Initialize rating state
       const ratings = {};
-      updatedHotels.forEach((hotel) => {
-        ratings[hotel.id] = hotel.rating || 0;
+      updatedRooms.forEach((room) => {
+        ratings[room.id] = room.rating || 0;
       });
       setRating(ratings);
     });
@@ -51,7 +51,7 @@ const HotelListing = () => {
     navigate('/login'); // Redirect to login page after logout
   };
 
-  const handleLike = async (hotelId) => {
+  const handleLike = async (roomId) => {
     if (!user) {
       alert('You need to be logged in to like a hotel');
       return;
@@ -61,53 +61,53 @@ const HotelListing = () => {
       const userRef = doc(db, 'users', user.uid);
       const userDoc = await getDoc(userRef);
       const userFavorites = userDoc.data()?.favorites || [];
-      const isFavorite = userFavorites.includes(hotelId);
+      const isFavorite = userFavorites.includes(roomId);
 
       await updateDoc(userRef, {
         favorites: isFavorite
-          ? userFavorites.filter((id) => id !== hotelId)
-          : [...userFavorites, hotelId],
+          ? userFavorites.filter((id) => id !== roomId)
+          : [...userFavorites, roomId],
       });
 
       dispatch(updateFavorites(isFavorite
-        ? userFavorites.filter((id) => id !== hotelId)
-        : [...userFavorites, hotelId]));
+        ? userFavorites.filter((id) => id !== roomId)
+        : [...userFavorites, roomId]));
 
-      console.log(isFavorite ? `Removed hotel ${hotelId} from favorites` : `Added hotel ${hotelId} to favorites`);
+      console.log(isFavorite ? `Removed hotel ${roomId} from favorites` : `Added hotel ${roomId} to favorites`);
     } catch (error) {
       console.error('Error liking hotel: ', error);
     }
   };
 
-  const handleShare = (hotelId) => {
-    const hotelUrl = `http://your-app-url/hotel-details/${hotelId}`;
+  const handleShare = (roomId) => {
+    const roomUrl = `http://your-app-url/hotel-details/${roomId}`;
 
     if (navigator.share) {
       navigator.share({
         title: 'Check out this hotel!',
-        url: hotelUrl,
+        url: roomUrl,
       }).catch((error) => console.log('Error sharing:', error));
     } else {
       alert('Sharing is not supported on this browser.');
     }
   };
 
-  const handleRatingClick = async (hotelId, newRating) => {
+  const handleRatingClick = async (roomId, newRating) => {
     try {
       // Update local state
-      setRating(prevRating => ({ ...prevRating, [hotelId]: newRating }));
+      setRating(prevRating => ({ ...prevRating, [roomId]: newRating }));
 
       // Update Firestore
-      const hotelRef = doc(db, 'hotels', hotelId);
+      const hotelRef = doc(db, 'hotels', roomId);
       await updateDoc(hotelRef, { rating: newRating });
 
-      console.log(`Updated hotel ${hotelId} rating to ${newRating}`);
+      console.log(`Updated hotel ${roomId} rating to ${newRating}`);
     } catch (error) {
       console.error('Error updating rating: ', error);
     }
   };
 
-  const sortedHotels = [...hotels].sort((a, b) => {
+  const sortedHotels = [...rooms].sort((a, b) => {
     if (sortOption === 'Price') {
       return a.price - b.price;
     } else if (sortOption === 'Rating') {
@@ -116,8 +116,8 @@ const HotelListing = () => {
     return 0;
   });
 
-  const handleViewDetails = (hotelId) => {
-    navigate(`/hotel-details/${hotelId}`);
+  const handleViewDetails = (roomId) => {
+    navigate(`/hotel-details/${roomId}`);
   };
 
   if (loading) return <p>Loading...</p>;
@@ -155,7 +155,7 @@ const HotelListing = () => {
         </div>
         <div className="location-info mb-6">
           <h2 className="text-lg font-semibold text-gray-700">
-            Pretoria: {hotels.length} hotels found
+            Pretoria: {rooms.length} rooms found
           </h2>
         </div>
       </section>
