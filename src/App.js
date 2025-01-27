@@ -29,7 +29,7 @@ function App() {
             </PrivateRoute>
           }  
         />
-        <Route path="/room-details/:roomId" element={<RoomDetails />} />
+        <Route path="/room/:roomId" element={<RoomDetails />} />
         <Route path="/booking-confirmation" element={<BookingConfirmation />} />
         <Route path="/profile" element={<Profile />} />
         

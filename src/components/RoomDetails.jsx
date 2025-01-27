@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import { FaWifi, FaSwimmer, FaParking, FaShieldAlt, FaUtensils, FaSnowflake } from 'react-icons/fa'; // Importing icons for facilities
+import { FaWifi, FaSwimmer, FaParking, FaShieldAlt, FaUtensils, FaSnowflake } from 'react-icons/fa'; 
 
 const RoomDetails = () => {
-  const { roomId } = useParams(); // Get the room ID from the URL
+  const { roomId } = useParams(); 
   const [room, setRoom] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -16,7 +16,14 @@ const RoomDetails = () => {
         const roomRef = doc(db, 'rooms', roomId);
         const roomDoc = await getDoc(roomRef);
         if (roomDoc.exists()) {
-          setRoom(roomDoc.data());
+          const roomData = roomDoc.data();
+
+          // Convert facilities string to array
+          if (roomData.facilities && typeof roomData.facilities === 'string') {
+            roomData.facilities = roomData.facilities.split(',').map((facility) => facility.trim());
+          }
+
+          setRoom(roomData);
         } else {
           setError('Room not found');
         }
@@ -26,26 +33,27 @@ const RoomDetails = () => {
         setLoading(false);
       }
     };
-
+  
     fetchRoomDetails();
   }, [roomId]);
+  
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
   const getFacilityIcon = (facility) => {
-    switch (facility) {
-      case 'Free WiFi':
+    switch (facility.toLowerCase()) {
+      case 'free wifi':
         return <FaWifi className="w-8 h-8 text-blue-600" />;
-      case 'Swimming Pool':
+      case 'swimming pool':
         return <FaSwimmer className="w-8 h-8 text-blue-600" />;
-      case 'Free Parking':
+      case 'free parking':
         return <FaParking className="w-8 h-8 text-blue-600" />;
-      case 'Security':
+      case 'security':
         return <FaShieldAlt className="w-8 h-8 text-blue-600" />;
-      case 'Kitchen':
+      case 'kitchen':
         return <FaUtensils className="w-8 h-8 text-blue-600" />;
-      case 'Air Conditioning':
+      case 'air conditioning':
         return <FaSnowflake className="w-8 h-8 text-blue-600" />;
       default:
         return null;
@@ -65,20 +73,24 @@ const RoomDetails = () => {
       </div>
       <div className="facilities mb-4">
         <h2 className="text-xl font-semibold">Facilities</h2>
-        <ul>
-          {room.facilities && room.facilities.map((facility, index) => (
-            <li key={index} className="flex items-center space-x-4">
-              {getFacilityIcon(facility)}
-              <p>{facility}</p>
-            </li>
-          ))}
-        </ul>
+        {Array.isArray(room.facilities) && room.facilities.length > 0 ? (
+          <ul>
+            {room.facilities.map((facility, index) => (
+              <li key={index} className="flex items-center space-x-4">
+                {getFacilityIcon(facility)}
+                <p>{facility}</p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No facilities available</p>
+        )}
       </div>
+
       <div className="location mb-4">
         <h2 className="text-xl font-semibold">Location</h2>
-        <p>{room.location}</p>
+        <p>{room.location || 'Location not provided'}</p>
       </div>
-      
     </div>
   );
 };

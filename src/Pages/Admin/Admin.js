@@ -10,6 +10,7 @@ import RoomList from "../../components/Admin/RoomList";
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [rooms, setRooms] = useState([]);
+  const [gallery, setGallery] = useState([]);
   const [newRoom, setNewRoom] = useState({
     name: "",
     price: 0,
@@ -47,6 +48,11 @@ const AdminDashboard = () => {
     fetchRooms();
   }, []);
 
+  const handleGalleryChange = (e) => {
+    const files = Array.from(e.target.files);
+    setGallery(files);
+  };
+
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -54,6 +60,29 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error("Error during logout:", error);
     }
+  };
+
+  const uploadGalleryImages = async (callback) => {
+    if (!gallery.length) {
+      alert("Please select images.");
+      return;
+    }
+
+    setUploading(true);
+    const uploadedImages = [];
+    for (const file of gallery) {
+      const imageRef = ref(storage, `rooms/gallery/${Date.now()}_${file.name}`);
+      try {
+        const uploadTask = uploadBytesResumable(imageRef, file);
+        await uploadTask;
+        const imageUrl = await getDownloadURL(uploadTask.snapshot.ref);
+        uploadedImages.push(imageUrl);
+      } catch (error) {
+        console.error("Error uploading image:", error);
+      }
+    }
+    callback(uploadedImages);
+    setUploading(false);
   };
 
   const handleInputChange = (e) => {
@@ -178,6 +207,8 @@ const AdminDashboard = () => {
         uploading={uploading}
         onImageChange={handleImageChange}
         uploadImage={uploadImage}
+        onGalleryChange={handleGalleryChange}
+        uploadGalleryImages={uploadGalleryImages}
       />
 
       <RoomList rooms={rooms} onDelete={handleDeleteRoom} onEdit={handleEditRoom} />
