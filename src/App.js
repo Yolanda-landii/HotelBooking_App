@@ -4,7 +4,7 @@ import Login from './Pages/User/Login';
 import HomePage from './Pages/User/HomePage';
 import PrivateRoute from './components/PrivateRoute';
 import AdminPrivateRoute from './components/Admin/AdminPrivateRoute';
-import HotelDetail from './components/HotelDetails';
+import RoomDetails from './components/RoomDetails';
 import AdminDashboard from './Pages/Admin/Admin';
 import BookingConfirmation from './components/BookingConfirmation';
 import Profile from './Pages/User/UserProfile';
@@ -29,7 +29,7 @@ function App() {
             </PrivateRoute>
           }  
         />
-        <Route path="/hotel-details/:id" element={<HotelDetail />} />
+        <Route path="/room-details/:roomId" element={<RoomDetails />} />
         <Route path="/booking-confirmation" element={<BookingConfirmation />} />
         <Route path="/profile" element={<Profile />} />
         

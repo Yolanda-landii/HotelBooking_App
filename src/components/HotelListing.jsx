@@ -73,7 +73,7 @@ const HotelListing = () => {
         ? userFavorites.filter((id) => id !== roomId)
         : [...userFavorites, roomId]));
 
-      console.log(isFavorite ? `Removed hotel ${roomId} from favorites` : `Added hotel ${roomId} to favorites`);
+      console.log(isFavorite ? `Removed room ${roomId} from favorites` : `Added hotel ${roomId} to favorites`);
     } catch (error) {
       console.error('Error liking hotel: ', error);
     }
@@ -98,16 +98,16 @@ const HotelListing = () => {
       setRating(prevRating => ({ ...prevRating, [roomId]: newRating }));
 
       // Update Firestore
-      const hotelRef = doc(db, 'hotels', roomId);
+      const hotelRef = doc(db, 'rooms', roomId);
       await updateDoc(hotelRef, { rating: newRating });
 
-      console.log(`Updated hotel ${roomId} rating to ${newRating}`);
+      console.log(`Updated rooms ${roomId} rating to ${newRating}`);
     } catch (error) {
       console.error('Error updating rating: ', error);
     }
   };
 
-  const sortedHotels = [...rooms].sort((a, b) => {
+  const sortedRooms = [...rooms].sort((a, b) => {
     if (sortOption === 'Price') {
       return a.price - b.price;
     } else if (sortOption === 'Rating') {
@@ -162,39 +162,39 @@ const HotelListing = () => {
 
       {/* Hotel Grid Section */}
       <section className="hotel-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6">
-  {sortedHotels.map((hotel) => (
-    <div key={hotel.id} className="hotel-card bg-white p-4 shadow-lg rounded-md border border-gray-200">
-      <img src={hotel.imageUrl} alt={hotel.name} className="hotel-image w-full h-48 object-cover rounded-md mb-4" />
-      <h3 className="hotel-name text-xl font-bold">{hotel.name}</h3>
-      <p className="hotel-price text-lg text-blue-600 mt-2">R{hotel.price}</p>
+  {sortedRooms.map((room) => (
+    <div key={room.id} className="hotel-card bg-white p-4 shadow-lg rounded-md border border-gray-200">
+      <img src={room.imageUrl} alt={room.name} className="hotel-image w-full h-48 object-cover rounded-md mb-4" />
+      <h3 className="hotel-name text-xl font-bold">{room.name}</h3>
+      <p className="hotel-price text-lg text-blue-600 mt-2">R{room.price}</p>
       <p className="hotel-distance text-sm text-gray-500 mt-1">
         <MdLocationOn className="inline mr-1" />
-        {hotel.distance} km away
+        {room.distance} km away
       </p>
       <div className="flex items-center mt-3">
-        <button className="like-button text-red-500 hover:text-red-600" onClick={() => handleLike(hotel.id)}>
-          {user?.favorites?.includes(hotel.id) ? (
+        <button className="like-button text-red-500 hover:text-red-600" onClick={() => handleLike(room.id)}>
+          {user?.favorites?.includes(room.id) ? (
             <FaHeart className="w-6 h-6 text-red-500" />
           ) : (
             <FaRegHeart className="w-6 h-6 text-gray-400" />
           )}
         </button>
-        <button className="share-button text-blue-500 hover:text-blue-600 ml-4" onClick={() => handleShare(hotel.id)}>
+        <button className="share-button text-blue-500 hover:text-blue-600 ml-4" onClick={() => handleShare(room.id)}>
           <FaShareAlt className="w-6 h-6" />
         </button>
         <div className="rating flex items-center ml-auto">
           {[...Array(5)].map((_, index) => (
             <FaStar
               key={index}
-              className={`w-5 h-5 ${index < (rating[hotel.id] || 0) ? 'text-yellow-500' : 'text-gray-300'} cursor-pointer`}
-              onClick={() => handleRatingClick(hotel.id, index + 1)}
+              className={`w-5 h-5 ${index < (rating[room.id] || 0) ? 'text-yellow-500' : 'text-gray-300'} cursor-pointer`}
+              onClick={() => handleRatingClick(room.id, index + 1)}
             />
           ))}
         </div>
       </div>
       <button
         className="view-details-btn mt-4 p-2 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700 w-full"
-        onClick={() => handleViewDetails(hotel.id)}
+        onClick={() => handleViewDetails(room.id)}
       >
         View Details
       </button>
