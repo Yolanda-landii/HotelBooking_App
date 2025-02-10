@@ -4,7 +4,6 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import CheckoutForm from './CheckoutForm';
 
-// Load your publishable Stripe key
 const stripePromise = loadStripe('pk_test_51PyWUREMz50nif55fK8C9cxOdEly9YE9oI3FSiPamkRbdehoxGezQa8sunPYYuqKDmwZPKhsmqZDeBOSmgkZPhhg00hcETCYXE');
 
 const BookingConfirmation = () => {
@@ -25,21 +24,17 @@ const BookingConfirmation = () => {
         <h3 className="text-xl font-semibold mb-2">Your Trip</h3>
         <p>Hotel: {hotelName}</p>
         <p>Dates: {checkin} - {checkout}</p>
-        <p>
-          Guests: {guests.adults} Adults, {guests.children} Children, {guests.infants} Infants, {guests.pets} Pets
-        </p>
+        <p>Guests: {guests.adults} Adults, {guests.children} Children, {guests.infants} Infants, {guests.pets} Pets</p>
         <p>Nights: {nights}</p>
       </div>
 
-      {/* Price Summary */}
       <div className="border p-4 mb-4">
         <h3 className="text-xl font-semibold mb-2">Price Details</h3>
         <p>Room price x {nights} nights: {totalPrice.toFixed(2)} ZAR</p>
-        {/* Add more price details if needed */}
         <p>Total: {totalPrice.toFixed(2)} ZAR</p>
       </div>
 
-      {/* Stripe Payment Form */}
+
       <Elements stripe={stripePromise}>
         <CheckoutForm bookingDetails={bookingDetails} />
       </Elements>

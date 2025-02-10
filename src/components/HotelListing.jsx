@@ -117,14 +117,14 @@ const HotelListing = () => {
   });
 
   const handleViewDetails = (roomId) => {
-    navigate(`/hotel-details/${roomId}`);
+    navigate(`/rooms/${roomId}`);
   };
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p className="text-red-500">Error: {error}</p>;
 
   return (
-    <div className="hotel-listing">
+    <div className="room-listing">
       <header className="header flex justify-between items-center p-4 bg-gray-900 text-white">
         <div className="logo">
           <img src="/images/logo.png" alt="Logo" className="w-24 h-auto" />

@@ -28,8 +28,9 @@ const CheckoutForm = ({ bookingDetails }) => {
       const response = await fetch('http://localhost:3001/create-payment-intent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: bookingDetails.totalPrice }) // Make sure this is valid
-      });
+        body: JSON.stringify({ amount: bookingDetails.totalPrice })
+    });
+    
   
       const { clientSecret } = await response.json();
   
