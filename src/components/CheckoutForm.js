@@ -3,7 +3,7 @@ import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
 import { useDispatch } from 'react-redux';
 import { createBooking } from '../redux/slices/bookingSlice';
 
-const CheckoutForm = ({ bookingDetails }) => {
+const CheckoutForm = ({ bookingDetails = {} }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [error, setError] = useState(null);
@@ -14,59 +14,66 @@ const CheckoutForm = ({ bookingDetails }) => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
-  
+    setError(null);
+
+    // ✅ Check if bookingDetails is valid
+    if (!bookingDetails || typeof bookingDetails !== 'object' || !bookingDetails.totalPrice) {
+      setError("Booking details are missing. Please refresh and try again.");
+      setLoading(false);
+      return;
+    }
+
     if (!stripe || !elements) {
       setError('Stripe.js has not loaded yet.');
       setLoading(false);
       return;
     }
-  
+
     const cardElement = elements.getElement(CardElement);
-  
-    // Call to your backend to create a PaymentIntent
+
     try {
-      const response = await fetch('http://localhost:3001/create-payment-intent', {
+      // Fetch PaymentIntent from backend
+      const response = await fetch('http://localhost:3002/create-payment-intent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: bookingDetails.totalPrice })
-    });
-    
-  
-      const { clientSecret } = await response.json();
-  
-      if (!clientSecret) {
-        setError('Failed to create payment intent.');
-        setLoading(false);
-        return;
+        body: JSON.stringify({ amount: bookingDetails.totalPrice }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.statusText}`);
       }
-  
-      // Confirm the card payment
+
+      const data = await response.json();
+
+      if (!data.clientSecret) {
+        throw new Error("Failed to create payment intent.");
+      }
+
+      const { clientSecret } = data;
+
+      // Confirm payment with Stripe
       const { paymentIntent, error: confirmError } = await stripe.confirmCardPayment(clientSecret, {
         payment_method: {
           card: cardElement,
-          billing_details: {
-            name: bookingDetails.userName,
-          },
+          billing_details: { name: bookingDetails.userName || 'Guest' },
         },
       });
-  
+
       if (confirmError) {
-        setError(confirmError.message);
-        setLoading(false);
-        return;
+        throw new Error(confirmError.message);
       }
-  
+
       if (paymentIntent.status === 'succeeded') {
         setSuccess(true);
         dispatch(createBooking(bookingDetails));
       }
     } catch (err) {
-      setError('Failed to process payment. Please try again.');
+      console.error("Payment error:", err.message);
+      setError(err.message || 'Failed to process payment. Please try again.');
+    } finally {
+      setLoading(false);
     }
-  
-    setLoading(false);
   };
-  
 
   return (
     <form onSubmit={handleSubmit}>

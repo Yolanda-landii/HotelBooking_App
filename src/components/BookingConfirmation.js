@@ -14,7 +14,7 @@ const BookingConfirmation = () => {
     return <div>No booking details available.</div>;
   }
 
-  const { checkin, checkout, guests, totalPrice, hotelName, nights } = bookingDetails;
+  const { checkin, checkout, guests, totalPrice, roomName, nights } = bookingDetails;
 
   return (
     <div className="container mx-auto p-4">
@@ -22,7 +22,7 @@ const BookingConfirmation = () => {
 
       <div className="border p-4 mb-4">
         <h3 className="text-xl font-semibold mb-2">Your Trip</h3>
-        <p>Hotel: {hotelName}</p>
+        <p>Room: {roomName}</p>
         <p>Dates: {checkin} - {checkout}</p>
         <p>Guests: {guests.adults} Adults, {guests.children} Children, {guests.infants} Infants, {guests.pets} Pets</p>
         <p>Nights: {nights}</p>

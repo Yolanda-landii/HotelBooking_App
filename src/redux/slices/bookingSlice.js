@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { getDocs, collection, query, where, addDoc, doc, getDoc } from 'firebase/firestore';
+import { getDocs, collection, query, where, addDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 
 const initialState = {
@@ -26,13 +26,42 @@ export const createBooking = createAsyncThunk(
   'booking/createBooking',
   async (bookingData, { rejectWithValue }) => {
     try {
-      const docRef = await addDoc(collection(db, 'bookings'), bookingData);
-      return { id: docRef.id, ...bookingData }; // Return the new booking with ID
+      const newBooking = { ...bookingData, status: 'pending' }; // Default status
+      const docRef = await addDoc(collection(db, 'bookings'), newBooking);
+      return { id: docRef.id, ...newBooking };
     } catch (error) {
       return rejectWithValue(error.message);
     }
   }
 );
+
+export const approveBooking = createAsyncThunk(
+  'booking/approveBooking',
+  async (bookingId, { rejectWithValue }) => {
+    try {
+      const bookingRef = doc(db, 'bookings', bookingId);
+      await updateDoc(bookingRef, { status: 'approved' });
+      return { id: bookingId, status: 'approved' };
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const cancelBooking = createAsyncThunk(
+  'booking/cancelBooking',
+  async (bookingId, { rejectWithValue }) => {
+    try {
+      const bookingRef = doc(db, 'bookings', bookingId);
+      await updateDoc(bookingRef, { status: 'canceled' });
+      return { id: bookingId, status: 'canceled' };
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+
 export const fetchAllBookings = createAsyncThunk(
   'booking/fetchAllBookings',
   async (_, { rejectWithValue }) => {

@@ -29,8 +29,9 @@ const ViewRoom = () => {
   }, [roomId]);
 
   const handleBooking = () => {
-    
-    navigate(`/rooms/${roomId}/book`);
+    if (room) {
+      navigate(`/rooms/${roomId}/book`, { state: { room } });
+    }
   };
 
   if (loading) return <p>Loading...</p>;
