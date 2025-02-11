@@ -1,34 +1,40 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { updateProfile, getUserProfile, uploadProfilePicture } from '../../utils/firabaseUtils'; // Add this import
+import { updateProfile, getUserProfile, uploadProfilePicture } from '../../utils/firabaseUtils';
 
 // Async thunk for updating user profile
 export const updateUserProfile = createAsyncThunk(
   'user/updateUserProfile',
-  async ({ uid, profileData, profilePicture }, { rejectWithValue }) => {
+  async ({ uid, profileData }, { rejectWithValue }) => {
     try {
-      let profilePictureURL;
-
-      // If there's a profile picture, upload it and get the URL
-      if (profilePicture) {
-        profilePictureURL = await uploadProfilePicture(uid, profilePicture);
-        profileData = { ...profileData, profilePicture: profilePictureURL };
-      }
-
       await updateProfile(uid, profileData);
-      return { ...profileData, profilePicture: profilePictureURL };
+      return profileData;
     } catch (error) {
       return rejectWithValue(error.message);
     }
   }
 );
 
-// Async thunk for fetching user profile data
+
 export const fetchUserProfile = createAsyncThunk(
   'user/fetchUserProfile',
   async (uid, { rejectWithValue }) => {
     try {
-      const profileData = await getUserProfile(uid);
-      return profileData;
+      if (!uid) throw new Error("UID is required for fetching user profile.");
+      return await getUserProfile(uid);
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+
+// Async thunk for uploading profile picture
+export const updateProfilePicture = createAsyncThunk(
+  'user/updateProfilePicture',
+  async ({ uid, file }, { rejectWithValue }) => {
+    try {
+      const profilePictureUrl = await uploadProfilePicture(uid, file);
+      return { profilePicture: profilePictureUrl };
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -100,7 +106,7 @@ const userSlice = createSlice({
       })
       .addCase(updateUserProfile.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = { ...state.user, ...action.payload }; // Update profile with new data
+        state.user = { ...state.user, ...action.payload };
       })
       .addCase(updateUserProfile.rejected, (state, action) => {
         state.loading = false;
@@ -114,6 +120,19 @@ const userSlice = createSlice({
         state.user = action.payload;
       })
       .addCase(fetchUserProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(updateProfilePicture.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(updateProfilePicture.fulfilled, (state, action) => {
+        state.loading = false;
+        if (state.user) {
+          state.user.profilePicture = action.payload.profilePicture;
+        }
+      })
+      .addCase(updateProfilePicture.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

@@ -26,7 +26,7 @@ function Login() {
       dispatch(loginSuccess({
         uid: user.uid,
         email: user.email,
-        role: isAdmin ? 'admin' : 'user', // Set role based on admin status
+        role: isAdmin ? 'admin' : 'user', 
       }));
 
       navigate(isAdmin ? '/admin' : '/');

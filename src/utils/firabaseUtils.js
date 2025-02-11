@@ -3,10 +3,16 @@ import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { db, storage } from '../config/firebase'; // Ensure you export `storage` from your Firebase config
 
 // Function to get user profile data
-export async function getUserProfile(uid) {
-  const userDoc = await getDoc(doc(db, 'users', uid));
-  return userDoc.exists() ? userDoc.data() : null;
-}
+export const getUserProfile = async (uid) => {
+  console.log("Fetching profile for user:", uid);  
+  const userDoc = await doc(db, 'users', uid); 
+  const userSnapshot = await getDoc(userDoc);
+  if (userSnapshot.exists()) {
+    return userSnapshot.data();
+  }
+  throw new Error('User not found');
+};
+
 
 // Function to update user profile data
 export async function updateProfile(uid, profileData) {

@@ -14,6 +14,7 @@ import CheckoutForm from './components/CheckoutForm';
 import AdminDashboard from './Pages/Admin/Admin';
 import BookingConfirmation from './components/BookingConfirmation';
 import Profile from './Pages/User/UserProfile';
+import Bookings from './components/Bookings';
 import Reservations from './Pages/Admin/Reservations';
 
 const stripePromise = loadStripe('pk_test_51PyWUREMz50nif55fK8C9cxOdEly9YE9oI3FSiPamkRbdehoxGezQa8sunPYYuqKDmwZPKhsmqZDeBOSmgkZPhhg00hcETCYXE');
@@ -40,6 +41,7 @@ function App() {
           }  
         />
         <Route path="/room/:roomId" element={<RoomDetails />} />
+        <Route path="/bookings" element={<Bookings />} />
         <Route path="/rooms/:roomId" element={<ViewRoom />} />
         <Route path="/rooms/:roomId/book" element={<BookingForm/>} />
         <Route path="/rooms/:roomId/book/confirm" element={<Elements stripe={stripePromise}>

@@ -1,24 +1,28 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { auth } from '../config/firebase'; // Assuming Firebase auth is configured
+import { signOut } from 'firebase/auth';
+import { auth } from '../config/firebase';
 
-const Logout = () => {
+const LogoutButton = () => {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const logoutUser = async () => {
-      try {
-        await auth.signOut(); // Sign out the user using Firebase
-        navigate('/login'); // Redirect to the login page after logout
-      } catch (error) {
-        console.error('Error logging out:', error);
-      }
-    };
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigate('/login'); 
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
 
-    logoutUser(); // Call the logout function when the component is mounted
-  }, [navigate]);
-
-  return <p>Logging out...</p>; // Show a loading message while logging out
+  return (
+    <button 
+      className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
+      onClick={handleLogout}
+    >
+      Logout
+    </button>
+  );
 };
 
-export default Logout;
+export default LogoutButton;

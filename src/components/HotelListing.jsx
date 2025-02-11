@@ -1,21 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchRooms } from '../redux/slices/roomSlice';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { collection, doc, getDoc, updateDoc, onSnapshot } from 'firebase/firestore';
 import { db, auth } from '../config/firebase';
 import { signOut } from 'firebase/auth';
-import { FaHeart, FaRegHeart, FaShareAlt, FaStar } from 'react-icons/fa'; // For icons
+import { FaHeart, FaRegHeart, FaShareAlt, FaStar } from 'react-icons/fa'; 
 import { MdLocationOn } from 'react-icons/md';
-import { updateFavorites } from '../redux/slices/userSlice'; // Import the updateFavorites action
+import { updateFavorites } from '../redux/slices/userSlice'; 
 
 const HotelListing = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { rooms, loading, error } = useSelector((state) => state.rooms);
-  const user = useSelector((state) => state.user.user); // Accessing user state correctly
-  const [sortOption, setSortOption] = useState(''); // For sorting
-  const [rating, setRating] = useState({}); // Local state for hotel ratings
+  const user = useSelector((state) => state.user.user); 
+  const [sortOption, setSortOption] = useState('');
+  const [rating, setRating] = useState({}); 
 
   useEffect(() => {
     // Fetch hotels on component mount
@@ -124,18 +124,19 @@ const HotelListing = () => {
   if (error) return <p className="text-red-500">Error: {error}</p>;
 
   return (
-    <div className="room-listing">
+    <div className="hotel-listing flex flex-col min-h-screen">
       <header className="header flex justify-between items-center p-4 bg-gray-900 text-white">
-        <div className="logo">
+          <div className="logo">
           <img src="/images/logo.png" alt="Logo" className="w-24 h-auto" />
-        </div>
-        <nav className="nav">
+          </div>
+          <nav className="nav">
           <ul className="flex space-x-6">
-            <li><a href="/" className="hover:underline">Home</a></li>
-            <li><a href="/profile" className="hover:underline">Profile</a></li>
-            <li><button onClick={handleLogout} className="hover:underline">Logout</button></li>
+              <li><a href="/" className="hover:underline">Home</a></li>
+              <li><a href="/bookings" className="hover:underline">Bookings</a></li>
+              <li><a href="/profile" className="hover:underline">Profile</a></li>
+              <li><Link to="/logout" className="hover:underline">Logout</Link></li>
           </ul>
-        </nav>
+          </nav>
       </header>
 
       {/* Search/Filter Section */}
@@ -202,8 +203,8 @@ const HotelListing = () => {
   ))}
 </section>
 
-      <footer className="footer bg-gray-800 text-white p-4 text-center">
-        <p>Copyright © 2024 Hotel Booking</p>
+<footer className="footer bg-gray-800 text-white p-4 text-center mt-auto">
+<p>Copyright © 2024 Hlala Nathi</p>
       </footer>
     </div>
   );

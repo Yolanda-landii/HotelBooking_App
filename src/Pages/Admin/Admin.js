@@ -28,6 +28,32 @@ const AdminDashboard = () => {
   const [imageFile, setImageFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [comments, setComments] = useState([]);
+
+  useEffect(() => {
+    const fetchComments = async () => {
+      try {
+        const roomsCollection = collection(db, "rooms");
+        const roomsSnapshot = await getDocs(roomsCollection);
+        let allComments = [];
+
+        for (const roomDoc of roomsSnapshot.docs) {
+          const commentsCollection = collection(db, `rooms/${roomDoc.id}/comments`);
+          const commentsSnapshot = await getDocs(commentsCollection);
+          const roomComments = commentsSnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+            roomId: roomDoc.id,
+          }));
+          allComments = [...allComments, ...roomComments];
+        }
+        setComments(allComments);
+      } catch (error) {
+        console.error("Error fetching comments:", error);
+      }
+    };
+    fetchComments();
+  }, []);
 
   useEffect(() => {
     const fetchRooms = async () => {
@@ -193,22 +219,19 @@ const AdminDashboard = () => {
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
-      <header className="flex justify-between items-center bg-gray-900 text-white p-4">
-      <div className="logo">
+      <header className="header flex justify-between items-center p-4 bg-gray-900 text-white">
+        <div className="logo">
           <img src="/images/logo.png" alt="Logo" className="w-24 h-auto" />
         </div>
-        {/* <nav className="nav"> */}
+        <nav className="nav">
           <ul className="flex space-x-6">
-            <li><a href="/" className="hover:underline">Home</a></li>
+            <li><a href="/admin" className="hover:underline">Home</a></li>
             <li><a href="/reservations" className="hover:underline">Reservations</a></li>
-            {/* <li><button onClick={handleLogout} className="hover:underline">Logout</button></li> */}
+            <li><button onClick={handleLogout} className="hover:underline">Logout</button></li>
           </ul>
-        {/* </nav> */}
-        <button onClick={handleLogout} className="bg-red-500 px-4 py-2 rounded">
-          Logout
-        </button>
+        </nav>
       </header>
-
+      {/*  */}
       <RoomForm
         room={selectedRoom || newRoom}
         onSubmit={selectedRoom ? handleUpdateRoom : handleAddRoom}
