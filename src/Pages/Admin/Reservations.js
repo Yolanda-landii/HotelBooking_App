@@ -32,21 +32,24 @@ const Reservations = () => {
               const userDocSnapshot = await getDoc(userDocRef);
               const userData = userDocSnapshot.exists() ? userDocSnapshot.data() : null;
 
+              // Ensure booking has all necessary details
+              const bookingDetails = {
+                guestName: booking.guestName || 'N/A',
+                roomType: booking.roomType || 'N/A',
+                checkInDate: booking.checkin || 'N/A',
+                checkOutDate: booking.checkout || 'N/A',
+                status: booking.status || 'N/A'
+              };
+
               // Add user details and booking details to the booking object
               return { 
                 ...booking, 
                 user: userData,  // Attach user data
-                bookingDetails: {  // Attach booking details (if needed)
-                  guestName: booking.guestName,
-                  roomType: booking.roomType,
-                  checkInDate: booking.checkInDate,
-                  checkOutDate: booking.checkOutDate,
-                  status: booking.status
-                }
+                bookingDetails: bookingDetails  // Attach booking details (if needed)
               };
             } catch (error) {
               console.error('Error fetching user details:', error);
-              return { ...booking, user: null };
+              return { ...booking, user: null, bookingDetails: null };
             }
           })
         );
@@ -111,39 +114,38 @@ const Reservations = () => {
       <div className="mb-8 bg-white p-6 rounded-lg shadow-lg">
         <h3 className="text-2xl font-semibold mb-4">Manage Bookings</h3>
         {bookings.length === 0 ? (
-  <p>No bookings found.</p>
-) : (
-  bookingsWithDetails.map((booking) => (
-    <div key={booking.id} className="p-4 mb-4 border border-gray-200 rounded-lg shadow-sm bg-gray-50">
-      <p><strong>Guest Name:</strong> {booking.guestName}</p>
-      <p><strong>Room:</strong> {booking.roomType}</p>
-      <p><strong>Check-in:</strong> {booking.checkInDate}</p>
-      <p><strong>Check-out:</strong> {booking.checkOutDate}</p>
-      <p><strong>Status:</strong> {booking.status}</p>
+          <p>No bookings found.</p>
+        ) : (
+          bookingsWithDetails.map((booking) => (
+            <div key={booking.id} className="p-4 mb-4 border border-gray-200 rounded-lg shadow-sm bg-gray-50">
+              <p><strong>Guest Name:</strong> {booking.bookingDetails.guestName}</p>
+              <p><strong>Room:</strong> {booking.bookingDetails.roomType}</p>
+              <p><strong>Check-in:</strong> {booking.bookingDetails.checkInDate}</p>
+              <p><strong>Check-out:</strong> {booking.bookingDetails.checkOutDate}</p>
+              <p><strong>Status:</strong> {booking.bookingDetails.status}</p>
 
-      {/* Display user details */}
-      {booking.user && (
-        <div className="mt-2">
-          <p><strong>User Email:</strong> {booking.user.email}</p>
-          <p><strong>Phone:</strong> {booking.user.phone || 'N/A'}</p>
-        </div>
-      )}
+              {/* Display user details */}
+              {booking.user && (
+                <div className="mt-2">
+                  <p><strong>User Email:</strong> {booking.user.email}</p>
+                  <p><strong>Phone:</strong> {booking.user.phone || 'N/A'}</p>
+                </div>
+              )}
 
-      <div className="flex gap-2 mt-4">
-        <button onClick={() => handleApproveBooking(booking.id)} className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-          Approve
-        </button>
-        <button onClick={() => handleModifyBooking(booking.id, { roomType: 'New Room Type' })} className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
-          Modify
-        </button>
-        <button onClick={() => handleCancelBooking(booking.id)} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
-          Cancel
-        </button>
-      </div>
-    </div>
-  ))
-)}
-
+              <div className="flex gap-2 mt-4">
+                <button onClick={() => handleApproveBooking(booking.id)} className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                  Approve
+                </button>
+                <button onClick={() => handleModifyBooking(booking.id, { roomType: 'New Room Type' })} className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
+                  Modify
+                </button>
+                <button onClick={() => handleCancelBooking(booking.id)} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

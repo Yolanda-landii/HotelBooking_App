@@ -61,7 +61,6 @@ export const cancelBooking = createAsyncThunk(
   }
 );
 
-
 export const fetchAllBookings = createAsyncThunk(
   'booking/fetchAllBookings',
   async (_, { rejectWithValue }) => {
@@ -92,8 +91,6 @@ export const fetchAllBookings = createAsyncThunk(
     }
   }
 );
-
-
 
 const bookingSlice = createSlice({
   name: 'booking',

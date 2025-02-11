@@ -194,7 +194,16 @@ const AdminDashboard = () => {
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       <header className="flex justify-between items-center bg-gray-900 text-white p-4">
-        <h1>Admin Dashboard</h1>
+      <div className="logo">
+          <img src="/images/logo.png" alt="Logo" className="w-24 h-auto" />
+        </div>
+        {/* <nav className="nav"> */}
+          <ul className="flex space-x-6">
+            <li><a href="/" className="hover:underline">Home</a></li>
+            <li><a href="/reservations" className="hover:underline">Reservations</a></li>
+            {/* <li><button onClick={handleLogout} className="hover:underline">Logout</button></li> */}
+          </ul>
+        {/* </nav> */}
         <button onClick={handleLogout} className="bg-red-500 px-4 py-2 rounded">
           Logout
         </button>

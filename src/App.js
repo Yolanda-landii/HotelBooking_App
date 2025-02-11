@@ -7,6 +7,7 @@ import HomePage from './Pages/User/HomePage';
 import PrivateRoute from './components/PrivateRoute';
 import AdminPrivateRoute from './components/Admin/AdminPrivateRoute';
 import RoomDetails from './components/RoomDetails';
+import Logout from './components/logout';
 import BookingForm from './components/BookingForm';
 import ViewRoom from './components/ViewRoom';
 import CheckoutForm from './components/CheckoutForm';
@@ -27,6 +28,7 @@ function App() {
         {/* Public Routes */}
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/logout" element={<Logout />} />
         
         {/* User Side Routes */}
         <Route 
