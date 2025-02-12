@@ -96,58 +96,63 @@ const Reservations = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <header className="header flex justify-between items-center p-4 bg-gray-900 text-white">
-        <div className="logo">
-          <img src="/images/logo.png" alt="Logo" className="w-24 h-auto" />
-        </div>
-        <nav className="nav">
-          <ul className="flex space-x-6">
-            <li><a href="/admin" className="hover:underline">Home</a></li>
-            <li><a href="/reservations" className="hover:underline">Reservations</a></li>
-            <li><button onClick={handleLogout} className="hover:underline">Logout</button></li>
-          </ul>
-        </nav>
-      </header>
-
-      {/* Manage Bookings */}
-      <div className="mb-8 bg-white p-6 rounded-lg shadow-lg">
-        <h3 className="text-2xl font-semibold mb-4">Manage Bookings</h3>
-        {bookings.length === 0 ? (
-          <p>No bookings found.</p>
-        ) : (
-          bookingsWithDetails.map((booking) => (
-            <div key={booking.id} className="p-4 mb-4 border border-gray-200 rounded-lg shadow-sm bg-gray-50">
-              <p><strong>Guest Name:</strong> {booking.bookingDetails.guestName}</p>
-              <p><strong>Room:</strong> {booking.bookingDetails.roomType}</p>
-              <p><strong>Check-in:</strong> {booking.bookingDetails.checkInDate}</p>
-              <p><strong>Check-out:</strong> {booking.bookingDetails.checkOutDate}</p>
-              <p><strong>Status:</strong> {booking.bookingDetails.status}</p>
-
-              {/* Display user details */}
-              {booking.user && (
-                <div className="mt-2">
-                  <p><strong>User Email:</strong> {booking.user.email}</p>
-                  <p><strong>Phone:</strong> {booking.user.phone || 'N/A'}</p>
-                </div>
-              )}
-
-              <div className="flex gap-2 mt-4">
-                <button onClick={() => handleApproveBooking(booking.id)} className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-                  Approve
-                </button>
-                <button onClick={() => handleModifyBooking(booking.id, { roomType: 'New Room Type' })} className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
-                  Modify
-                </button>
-                <button onClick={() => handleCancelBooking(booking.id)} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
-                  Cancel
-                </button>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
+    <div className="flex flex-col min-h-screen">
+  <header className="header flex justify-between items-center p-4 bg-gray-900 text-white">
+    <div className="logo">
+      <img src="/images/logo.png" alt="Logo" className="w-24 h-auto" />
     </div>
+    <nav className="nav">
+      <ul className="flex space-x-6">
+        <li><a href="/admin" className="hover:underline">Home</a></li>
+        <li><a href="/reservations" className="hover:underline">Reservations</a></li>
+        <li><button onClick={handleLogout} className="hover:underline">Logout</button></li>
+      </ul>
+    </nav>
+  </header>
+
+  {/* Manage Bookings */}
+  <div className="flex-grow mb-8 bg-white p-6 rounded-lg shadow-lg">
+    <h3 className="text-2xl font-semibold mb-4">Manage Bookings</h3>
+    {bookings.length === 0 ? (
+      <p>No bookings found.</p>
+    ) : (
+      bookingsWithDetails.map((booking) => (
+        <div key={booking.id} className="p-4 mb-4 border border-gray-200 rounded-lg shadow-sm bg-gray-50">
+          <p><strong>Guest Name:</strong> {booking.bookingDetails.guestName}</p>
+          <p><strong>Room:</strong> {booking.bookingDetails.roomType}</p>
+          <p><strong>Check-in:</strong> {booking.bookingDetails.checkInDate}</p>
+          <p><strong>Check-out:</strong> {booking.bookingDetails.checkOutDate}</p>
+          <p><strong>Status:</strong> {booking.bookingDetails.status}</p>
+
+          {/* Display user details */}
+          {booking.user && (
+            <div className="mt-2">
+              <p><strong>User Email:</strong> {booking.user.email}</p>
+              <p><strong>Phone:</strong> {booking.user.phone || 'N/A'}</p>
+            </div>
+          )}
+
+          <div className="flex gap-2 mt-4">
+            <button onClick={() => handleApproveBooking(booking.id)} className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+              Approve
+            </button>
+            <button onClick={() => handleModifyBooking(booking.id, { roomType: 'New Room Type' })} className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
+              Modify
+            </button>
+            <button onClick={() => handleCancelBooking(booking.id)} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+              Cancel
+            </button>
+          </div>
+        </div>
+      ))
+    )}
+  </div>
+
+  <footer className="footer bg-gray-800 text-white p-4 text-center mt-auto">
+    <p>Copyright © 2024 Hlala Nathi</p>
+  </footer>
+</div>
+
   );
 };
 

@@ -218,7 +218,7 @@ const AdminDashboard = () => {
   if (loading) return <p>Loading rooms...</p>;
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
+    <div className="flex flex-col min-h-screen p-6 bg-gray-100">
       <header className="header flex justify-between items-center p-4 bg-gray-900 text-white">
         <div className="logo">
           <img src="/images/logo.png" alt="Logo" className="w-24 h-auto" />
@@ -231,19 +231,25 @@ const AdminDashboard = () => {
           </ul>
         </nav>
       </header>
-      {/*  */}
-      <RoomForm
-        room={selectedRoom || newRoom}
-        onSubmit={selectedRoom ? handleUpdateRoom : handleAddRoom}
-        onChange={handleInputChange}
-        uploading={uploading}
-        onImageChange={handleImageChange}
-        uploadImage={uploadImage}
-        onGalleryChange={handleGalleryChange}
-        uploadGalleryImages={uploadGalleryImages}
-      />
 
-      <RoomList rooms={rooms} onDelete={handleDeleteRoom} onEdit={handleEditRoom} />
+      <main className="flex-grow">
+        <RoomForm
+          room={selectedRoom || newRoom}
+          onSubmit={selectedRoom ? handleUpdateRoom : handleAddRoom}
+          onChange={handleInputChange}
+          uploading={uploading}
+          onImageChange={handleImageChange}
+          uploadImage={uploadImage}
+          onGalleryChange={handleGalleryChange}
+          uploadGalleryImages={uploadGalleryImages}
+        />
+
+        <RoomList rooms={rooms} onDelete={handleDeleteRoom} onEdit={handleEditRoom} />
+      </main>
+
+      <footer className="footer bg-gray-800 text-white p-4 text-center">
+        <p>Copyright © 2024 Hlala Nathi</p>
+      </footer>
     </div>
   );
 };
