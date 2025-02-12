@@ -28,6 +28,7 @@ const Bookings = () => {
             <ul className="flex space-x-6">
                 <li><a href="/" className="hover:underline">Home</a></li>
                 <li><a href="/bookings" className="hover:underline">Bookings</a></li>
+                <li><a href="/messages" className="hover:underline">Messages</a></li>
                 <li><a href="/profile" className="hover:underline">Profile</a></li>
                 <li><Link to="/logout" className="hover:underline">Logout</Link></li>
             </ul>
@@ -50,14 +51,22 @@ const Bookings = () => {
                     <p className="text-gray-600">Check-in: {booking.checkin}</p>
                     <p className="text-gray-600">Check-out: {booking.checkout}</p>
 
-                    {/* Fixing guests display */}
                     <p className="text-gray-600">
-                        Guests: {booking.guests.adults} Adults, {booking.guests.children} Children, {booking.guests.infants} Infants, {booking.guests.pets} Pets
-                    </p>
+                        Guests: {booking.guests?.adults || 0} Adults, 
+                        {booking.guests?.children || 0} Children, 
+                        {booking.guests?.infants || 0} Infants, 
+                        {booking.guests?.pets || 0} Pets
+                        </p>
 
-                    <p className="text-gray-600">
-                        Status: <span className={`font-semibold ${booking.status === 'Approved' ? 'text-green-500' : 'text-yellow-500'}`}>{booking.status}</span>
-                    </p>
+
+                        <p className="text-gray-600">
+                            Status: <span className={`font-semibold 
+                                ${booking.status === 'Approved' ? 'text-green-500' : 
+                                booking.status === 'Pending' ? 'text-yellow-500' : 'text-red-500'}`}>
+                                {booking.status}
+                            </span>
+                            </p>
+
                     <p className="text-blue-600 font-semibold mt-2">Total: R{booking.totalPrice}</p>
                     </div>
                 ))}

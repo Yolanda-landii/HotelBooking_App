@@ -4,6 +4,8 @@ import { Elements } from '@stripe/react-stripe-js';
 import Register from './Pages/User/Register';
 import Login from './Pages/User/Login';
 import HomePage from './Pages/User/HomePage';
+import { NotificationsProvider } from "./contexts/NotificationsContext";
+import Notifications from './components/Messages';
 import PrivateRoute from './components/PrivateRoute';
 import AdminPrivateRoute from './components/Admin/AdminPrivateRoute';
 import RoomDetails from './components/RoomDetails';
@@ -25,6 +27,7 @@ function App() {
 
   return (
     <Router>
+      <NotificationsProvider>
       <Routes>
         {/* Public Routes */}
         <Route path="/register" element={<Register />} />
@@ -44,21 +47,22 @@ function App() {
         <Route path="/bookings" element={<Bookings />} />
         <Route path="/rooms/:roomId" element={<ViewRoom />} />
         <Route path="/rooms/:roomId/book" element={<BookingForm/>} />
+        <Route path="/messages" element={<Notifications/>} />
         <Route path="/rooms/:roomId/book/confirm" element={<Elements stripe={stripePromise}>
               <CheckoutForm />
             </Elements>} />
         <Route path="/booking-confirmation" element={<BookingConfirmation />} />
         <Route path="/profile" element={<Profile />} />
-        
         {/* Admin Side Routes */}
         <Route path="/admin" element={
-            <AdminPrivateRoute>
+          <AdminPrivateRoute>
               <AdminDashboard />
             </AdminPrivateRoute>
           } 
-        />
+          />
         <Route path='/reservations' element={<Reservations />} />
       </Routes>
+          </NotificationsProvider>
     </Router>
   );
 }

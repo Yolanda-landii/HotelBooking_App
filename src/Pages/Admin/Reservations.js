@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchRooms } from '../../redux/slices/roomSlice';
 import { fetchAllBookings } from '../../redux/slices/bookingSlice';
 import { db, auth } from '../../config/firebase';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc,serverTimestamp,addDoc,collection } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 
@@ -20,7 +20,8 @@ const Reservations = () => {
     dispatch(fetchRooms());
     dispatch(fetchAllBookings());
   }, [dispatch]);
-
+  
+  
   useEffect(() => {
     const fetchUserDetailsForBookings = async () => {
       if (bookings.length > 0) {
@@ -60,20 +61,39 @@ const Reservations = () => {
     fetchUserDetailsForBookings();
   }, [bookings]); // Now `bookings` is used directly inside the effect
 
+  const sendNotification = async (recipientId, message) => {
+    try {
+      await addDoc(collection(db, "notifications"), {
+        recipientId,
+        message,
+        timestamp: serverTimestamp(),
+        status: "unread",
+      });
+    } catch (error) {
+      console.error("Error sending notification:", error);
+    }
+  };
   const handleLogout = async () => {
     await signOut(auth);
     navigate('/login');
   };
 
-  const handleApproveBooking = async (bookingId) => {
+  const handleApproveBooking = async (bookingId, userId) => {
     try {
       const bookingRef = doc(db, 'bookings', bookingId);
       await updateDoc(bookingRef, { status: 'Approved' });
-      dispatch(fetchAllBookings()); // Refresh the bookings list
+  
+      
+      if (userId) {
+        await sendNotification(userId, "Your booking has been approved!");
+      }
+  
+      dispatch(fetchAllBookings());
     } catch (error) {
       console.error('Error approving booking:', error);
     }
   };
+  
 
   const handleModifyBooking = async (bookingId, updatedDetails) => {
     try {
@@ -133,9 +153,9 @@ const Reservations = () => {
           )}
 
           <div className="flex gap-2 mt-4">
-            <button onClick={() => handleApproveBooking(booking.id)} className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-              Approve
-            </button>
+          <button onClick={() => handleApproveBooking(booking.id, booking.userId)} className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+            Approve
+          </button>
             <button onClick={() => handleModifyBooking(booking.id, { roomType: 'New Room Type' })} className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
               Modify
             </button>
