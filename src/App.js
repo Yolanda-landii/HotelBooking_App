@@ -48,7 +48,7 @@ function App() {
         <Route path="/rooms/:roomId" element={<ViewRoom />} />
         <Route path="/rooms/:roomId/book" element={<BookingForm/>} />
         <Route path="/messages" element={<Notifications/>} />
-        <Route path="/rooms/:roomId/book/confirm" element={<Elements stripe={stripePromise}>
+        <Route path="/checkout" element={<Elements stripe={stripePromise}>
               <CheckoutForm />
             </Elements>} />
         <Route path="/booking-confirmation" element={<BookingConfirmation />} />

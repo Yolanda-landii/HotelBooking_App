@@ -1,16 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
 import { useDispatch } from 'react-redux';
+import { useLocation } from "react-router-dom";
 import { createBooking } from '../redux/slices/bookingSlice';
 
-const CheckoutForm = ({ bookingDetails }) => {
+const CheckoutForm = () => {
   const stripe = useStripe();
+  const location = useLocation();
   const elements = useElements();
   const dispatch = useDispatch();
-
+  const { bookingDetails = {} } = location.state || {};
+  
+  console.log("Booking Details:", bookingDetails);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    if (error) console.error("Payment Error:", error);
+  }, [error]);
+
+  useEffect(() => {
+    if (!bookingDetails) {
+      console.warn("Booking details are missing!");
+    } else {
+      console.log("Booking Details:", bookingDetails);
+    }
+  }, [bookingDetails]);
+  console.log("Parent Booking Details:", bookingDetails);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -24,6 +41,7 @@ const CheckoutForm = ({ bookingDetails }) => {
     }
 
     if (!bookingDetails || typeof bookingDetails !== 'object' || !bookingDetails.totalPrice || bookingDetails.totalPrice <= 0) {
+      console.error("Invalid Booking Details:", bookingDetails);
       setError("Invalid booking details. Please refresh and try again.");
       setLoading(false);
       return;
@@ -32,18 +50,20 @@ const CheckoutForm = ({ bookingDetails }) => {
     const cardElement = elements.getElement(CardElement);
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/create-payment-intent`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: bookingDetails.totalPrice }),
+      const response = await fetch("http://localhost:3002/create-payment-intent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: bookingDetails.totalPrice * 100 }),
       });
 
-      if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.statusText}`);
+      }
 
-      const { clientSecret } = await response.json();
-      if (!clientSecret) throw new Error("Failed to create payment intent.");
+      const data = await response.json();
+      if (!data.clientSecret) throw new Error("Failed to create payment intent.");
 
-      const { paymentIntent, error: confirmError } = await stripe.confirmCardPayment(clientSecret, {
+      const { paymentIntent, error: confirmError } = await stripe.confirmCardPayment(data.clientSecret, {
         payment_method: {
           card: cardElement,
           billing_details: { name: bookingDetails.userName || 'Guest' },
@@ -57,7 +77,7 @@ const CheckoutForm = ({ bookingDetails }) => {
         dispatch(createBooking(bookingDetails));
       }
     } catch (err) {
-      console.error("Payment error:", err.message);
+      console.error("Payment Error:", err.message);
       setError(err.message || 'Failed to process payment. Please try again.');
     } finally {
       setLoading(false);

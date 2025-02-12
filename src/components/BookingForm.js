@@ -45,7 +45,8 @@ const BookingForm = () => {
 
     dispatch(createBooking(bookingDetails))
       .then(() => {
-        navigate(`/rooms/${room.id}/book/confirm`, { state: { bookingDetails } });
+        console.log("Booking Details before navigation:", bookingDetails);
+        navigate(`/checkout`, { state: { bookingDetails } });
       })
       .catch((error) => {
         console.error('Error creating booking:', error);
