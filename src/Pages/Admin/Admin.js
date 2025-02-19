@@ -161,8 +161,14 @@ const AdminDashboard = () => {
 
     try {
       const newRoomRef = collection(db, "rooms");
-      const docRef = await addDoc(newRoomRef, newRoom);
-      setRooms((prev) => [...prev, { id: docRef.id, ...newRoom }]);
+      const docRef = await addDoc(newRoomRef, newRoom); 
+      const roomId = docRef.id;
+  
+      await updateDoc(docRef, { id: roomId });
+  
+      setRooms((prev) => [...prev, { id: roomId, ...newRoom }]);
+  
+      // Reset form state
       setNewRoom({
         name: "",
         price: 0,
@@ -181,6 +187,7 @@ const AdminDashboard = () => {
       console.error("Error adding room:", error);
     }
   };
+  
 
   const handleDeleteRoom = async (id) => {
     try {
