@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
 import { useDispatch } from 'react-redux';
-import { useLocation } from "react-router-dom";
+import { useLocation,useNavigation } from "react-router-dom";
 import { createBooking } from '../redux/slices/bookingSlice';
 
 const CheckoutForm = () => {
   const stripe = useStripe();
+  const navigate = useNavigation()
   const location = useLocation();
   const elements = useElements();
   const dispatch = useDispatch();
   const { bookingDetails = {} } = location.state || {};
-  
-  console.log("Booking Details:", bookingDetails);
+
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -23,11 +23,8 @@ const CheckoutForm = () => {
   useEffect(() => {
     if (!bookingDetails) {
       console.warn("Booking details are missing!");
-    } else {
-      console.log("Booking Details:", bookingDetails);
     }
   }, [bookingDetails]);
-  console.log("Parent Booking Details:", bookingDetails);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -75,6 +72,7 @@ const CheckoutForm = () => {
       if (paymentIntent.status === 'succeeded') {
         setSuccess(true);
         dispatch(createBooking(bookingDetails));
+        setTimeout(() => navigate("/"), 2000);
       }
     } catch (err) {
       console.error("Payment Error:", err.message);
@@ -85,20 +83,37 @@ const CheckoutForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-lg mx-auto p-6 bg-white shadow-md rounded-lg">
-      <h2 className="text-xl font-semibold text-center mb-4">Payment Details</h2>
-      <div className="border p-4 rounded-md">
-        <CardElement className="p-2 border rounded-md" />
+    <form
+      onSubmit={handleSubmit}
+      className="max-w-md mx-auto p-8 bg-gray-100 shadow-lg rounded-lg mt-10"
+    >
+      <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
+        Payment Details
+      </h2>
+      <div className="p-4 border border-gray-300 rounded-lg bg-white shadow-sm">
+        <CardElement
+          className="p-3 border border-gray-200 rounded-md focus:border-blue-500 transition duration-200"
+        />
       </div>
-      {error && <div className="text-red-500 mt-2 text-center">{error}</div>}
+      {error && (
+        <div className="text-red-600 mt-4 text-sm text-center">
+          {error}
+        </div>
+      )}
       <button
         type="submit"
         disabled={!stripe || loading}
-        className="block w-full p-2 mt-4 bg-blue-600 text-white font-bold rounded-md hover:bg-blue-700 transition duration-200"
+        className={`block w-full py-3 mt-6 text-white font-semibold rounded-lg transition duration-300 ${
+          loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+        }`}
       >
         {loading ? 'Processing...' : 'Confirm and Pay'}
       </button>
-      {success && <div className="text-green-500 mt-4 text-center">Payment successful! Booking confirmed.</div>}
+      {success && (
+        <div className="text-green-600 mt-6 text-center text-lg font-semibold">
+          Payment successful! Booking confirmed.
+        </div>
+      )}
     </form>
   );
 };

@@ -59,7 +59,7 @@ const Reservations = () => {
     };
 
     fetchUserDetailsForBookings();
-  }, [bookings]); // Now `bookings` is used directly inside the effect
+  }, [bookings]); 
 
   const sendNotification = async (recipientId, message) => {
     try {
@@ -87,6 +87,7 @@ const Reservations = () => {
       if (userId) {
         await sendNotification(userId, "Your booking has been approved!");
       }
+      
   
       dispatch(fetchAllBookings());
     } catch (error) {
@@ -95,21 +96,27 @@ const Reservations = () => {
   };
   
 
-  const handleModifyBooking = async (bookingId, updatedDetails) => {
+  const handleModifyBooking = async (bookingId, updatedDetails, userId) => {
     try {
       const bookingRef = doc(db, 'bookings', bookingId);
       await updateDoc(bookingRef, updatedDetails);
-      dispatch(fetchAllBookings()); // Refresh the bookings list
+      if (userId) {
+        await sendNotification(userId, "Your booking has been modified.");
+      }
+      dispatch(fetchAllBookings()); 
     } catch (error) {
       console.error('Error modifying booking:', error);
     }
   };
 
-  const handleCancelBooking = async (bookingId) => {
+  const handleCancelBooking = async (bookingId,userId) => {
     try {
       const bookingRef = doc(db, 'bookings', bookingId);
       await updateDoc(bookingRef, { status: 'Canceled' });
-      dispatch(fetchAllBookings()); // Refresh the bookings list
+      if (userId) {
+        await sendNotification(userId, "Your booking has been canceled.");
+      }
+      dispatch(fetchAllBookings()); 
     } catch (error) {
       console.error('Error canceling booking:', error);
     }

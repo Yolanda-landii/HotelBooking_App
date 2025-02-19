@@ -14,13 +14,16 @@ const BookingForm = () => {
   const [checkout, setCheckout] = useState('');
   const [guests, setGuests] = useState({ adults: 1, children: 0, infants: 0, pets: 0 });
 
+  // Dynamically calculate nights and total price
+  const nights = checkin && checkout ? (new Date(checkout) - new Date(checkin)) / (1000 * 60 * 60 * 24) : 0;
+  const totalPrice = room && nights > 0 ? room.price * nights : 0;
+
   const handleSubmit = () => {
     if (!room) {
       console.error("Room data is undefined");
       return;
     }
 
-    const nights = (new Date(checkout) - new Date(checkin)) / (1000 * 60 * 60 * 24);
     if (nights <= 0) {
       alert("Checkout date must be after check-in date.");
       return;
@@ -38,7 +41,7 @@ const BookingForm = () => {
       checkin,
       checkout,
       guests,
-      totalPrice: room.price * nights,
+      totalPrice,
       nights,
       userId,
     };
@@ -103,7 +106,15 @@ const BookingForm = () => {
             ))}
           </div>
         </div>
-        
+        <div className="mt-4">
+          <h3 className="text-lg font-semibold">Booking Summary</h3>
+          <p className="text-gray-700 mt-2">
+            <span className="font-medium">Nights:</span> {nights || 0}
+          </p>
+          <p className="text-gray-700">
+            <span className="font-medium">Total Price:</span> R{totalPrice.toFixed(2)}
+          </p>
+        </div>
         <button
           className="w-full bg-blue-600 text-white mt-6 py-2 rounded-md shadow-md hover:bg-blue-700 transition duration-200"
           onClick={handleSubmit}
@@ -113,7 +124,7 @@ const BookingForm = () => {
         </button>
       </div>
       <footer className="footer bg-gray-800 text-white p-4 text-center mt-auto">
-<p>Copyright © 2024 Hlala Nathi</p>
+        <p>Copyright © 2024 Hlala Nathi</p>
       </footer>
     </div>
   );
