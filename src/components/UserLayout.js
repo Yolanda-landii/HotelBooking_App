@@ -1,13 +1,17 @@
-// // UserLayout.js
-// import React from 'react';
+import React from 'react';
+import Navbar from './Navigation';
+import Footer from './Footer';
 
-// function UserLayout({ children }) {
-//   return (
-//     <div className="user-layout">
-//       <nav>User-specific navigation </nav>
-//       <main>{children}</main>
-//     </div>
-//   );
-// }
+const Layout = ({ children }) => {
+  return (
+    <div className="flex flex-col min-h-screen">
+      <Navbar />
+      <main className="flex-grow container mx-auto p-6">
+        {children}
+      </main>
+      <Footer />
+    </div>
+  );
+};
 
-// export default UserLayout;
+export default Layout;

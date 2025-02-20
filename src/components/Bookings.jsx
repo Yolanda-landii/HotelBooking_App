@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link } from 'react-router-dom';
 import { fetchUserBookings, selectBookings, selectBookingStatus, selectBookingError } from "../redux/slices/bookingSlice";
 import { useAuth } from "../contexts/AuthContext"; 
+import Footer from "./Footer";
 
 const Bookings = () => {
   const dispatch = useDispatch();
@@ -44,7 +45,6 @@ const Bookings = () => {
         </nav>
       </header>
 
-      {/* Main Content */}
       <main className="flex-grow container mx-auto p-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Your Booking History</h2>
 
@@ -55,11 +55,11 @@ const Bookings = () => {
             className={`mr-2 ${filterStatus === 'all' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}>
             All
           </button>
-          <button 
+          {/* <button 
             onClick={() => setFilterStatus('Pending')}
             className={`mr-2 ${filterStatus === 'Pending' ? 'bg-yellow-500 text-white' : 'bg-gray-200'}`}>
             Pending
-          </button>
+          </button> */}
           <button 
             onClick={() => setFilterStatus('Approved')}
             className={`mr-2 ${filterStatus === 'Approved' ? 'bg-green-500 text-white' : 'bg-gray-200'}`}>
@@ -69,6 +69,11 @@ const Bookings = () => {
             onClick={() => setFilterStatus('Canceled')}
             className={`mr-2 ${filterStatus === 'Canceled' ? 'bg-red-500 text-white' : 'bg-gray-200'}`}>
             Canceled
+          </button>
+          <button 
+            onClick={() => setFilterStatus('Modified')}
+            className={`mr-2 ${filterStatus === 'Modified' ? 'bg-red-500 text-white' : 'bg-gray-200'}`}>
+            Modified
           </button>
         </div>
 

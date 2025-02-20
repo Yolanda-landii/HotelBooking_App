@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, Link } from 'react-router-dom';
-import { db, auth, storage } from '../../config/firebase';
-import { signOut } from 'firebase/auth';
+import {  Link } from 'react-router-dom';
+import { db, storage } from '../../config/firebase';
 import { updateUserProfile, fetchUserProfile } from '../../redux/slices/userSlice';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
@@ -11,7 +10,6 @@ const DEFAULT_PROFILE_PICTURE = '/images/default-profile.png';
 function Profile() {
   const dispatch = useDispatch();
   const { user, loading, error } = useSelector((state) => state.user);
-  const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
   const [displayName, setDisplayName] = useState('');
@@ -20,6 +18,7 @@ function Profile() {
   const [profilePicture, setProfilePicture] = useState(null);
   const [profilePictureUrl, setProfilePictureUrl] = useState(DEFAULT_PROFILE_PICTURE);
 
+  
   // Fetch user data on mount
   useEffect(() => {
     if (user?.uid) {
@@ -51,36 +50,35 @@ const handleSubmit = async (e) => {
     return;
   }
 
+  if (!displayName || !email) {
+    console.error('Display Name and Email are required');
+    return;
+  }
+
   let newProfilePictureUrl = profilePictureUrl;
+
   if (profilePicture) {
     try {
       const profilePicRef = ref(storage, `profilePictures/${user.uid}`);
       const snapshot = await uploadBytes(profilePicRef, profilePicture);
       newProfilePictureUrl = await getDownloadURL(snapshot.ref);
     } catch (error) {
-      console.error('Error uploading image:', error);
+      console.error('Error uploading profile picture:', error);
       return;
     }
   }
 
   const profileData = {
-    displayName,
-    lastName,
-    email,
-    phoneNumber,
+    displayName: displayName.trim(),
+    lastName: lastName.trim(),
+    email: email.trim(),
+    phoneNumber: phoneNumber.trim(),
     profilePictureUrl: newProfilePictureUrl,
   };
 
   dispatch(updateUserProfile({ uid: user.uid, profileData }));
 };
 
-  
-  
-
-  const handleLogout = async () => {
-    await signOut(auth);
-    navigate('/login');
-  };
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
@@ -90,10 +88,11 @@ const handleSubmit = async (e) => {
         </div>
         <nav className="nav">
           <ul className="flex space-x-6">
-            <li><Link to="/" className="hover:underline">Home</Link></li>
-            <li><Link to="/bookings" className="hover:underline">Bookings</Link></li>
-            <li><Link to="/profile" className="hover:underline">Profile</Link></li>
-            <li><button onClick={handleLogout} className="hover:underline">Logout</button></li>
+            <li><a href="/" className="hover:underline">Home</a></li>
+            <li><a href="/bookings" className="hover:underline">Bookings</a></li>
+            <li><a href="/messages" className="hover:underline">Messages</a></li>
+            <li><a href="/profile" className="hover:underline">Profile</a></li>
+            <li><Link to="/logout" className="hover:underline">Logout</Link></li>
           </ul>
         </nav>
       </header>

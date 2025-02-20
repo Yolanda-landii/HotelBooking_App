@@ -14,7 +14,7 @@ import BookingForm from './components/BookingForm';
 import ViewRoom from './components/ViewRoom';
 import CheckoutForm from './components/CheckoutForm';
 import AdminDashboard from './Pages/Admin/Admin';
-// import BookingConfirmation from './components/BookingConfirmation';
+import Layout from './components/UserLayout';
 import Profile from './Pages/User/UserProfile';
 import Bookings from './components/Bookings';
 import Reservations from './Pages/Admin/Reservations';

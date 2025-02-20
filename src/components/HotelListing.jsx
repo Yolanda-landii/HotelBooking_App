@@ -9,6 +9,7 @@ import { FaHeart, FaRegHeart, FaShareAlt, FaStar } from 'react-icons/fa';
 import { MdLocationOn } from 'react-icons/md';
 import { updateFavorites } from '../redux/slices/userSlice'; 
 
+
 const HotelListing = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -46,10 +47,7 @@ const HotelListing = () => {
     setSortOption(e.target.value);
   };
 
-  const handleLogout = async () => {
-    await signOut(auth);
-    navigate('/login'); // Redirect to login page after logout
-  };
+  
 
   const handleLike = async (roomId) => {
     if (!user) {
@@ -124,19 +122,20 @@ const HotelListing = () => {
   if (error) return <p className="text-red-500">Error: {error}</p>;
 
   return (
-    <div className="hotel-listing flex flex-col min-h-screen">
+    <div className="header flex flex-col min-h-screen">
       <header className="header flex justify-between items-center p-4 bg-gray-900 text-white">
           <div className="logo">
           <img src="/images/logo.png" alt="Logo" className="w-24 h-auto" />
           </div>
           <nav className="nav">
           <ul className="flex space-x-6">
-              <li><a href="/" className="hover:underline">Home</a></li>
-              <li><a href="/bookings" className="hover:underline">Bookings</a></li>
-              <li><a href="/profile" className="hover:underline">Profile</a></li>
-              <li><Link to="/logout" className="hover:underline">Logout</Link></li>
+            <li><a href="/" className="hover:underline">Home</a></li>
+            <li><a href="/bookings" className="hover:underline">Bookings</a></li>
+            <li><a href="/messages" className="hover:underline">Messages</a></li>
+            <li><a href="/profile" className="hover:underline">Profile</a></li>
+            <li><Link to="/logout" className="hover:underline">Logout</Link></li>
           </ul>
-          </nav>
+        </nav>
       </header>
 
       {/* Search/Filter Section */}

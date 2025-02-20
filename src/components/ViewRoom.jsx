@@ -5,6 +5,7 @@ import { doc, onSnapshot, collection, addDoc, query, orderBy, serverTimestamp } 
 import { db } from '../config/firebase';
 import { FaWifi, FaSwimmer, FaParking, FaShieldAlt, FaUtensils, FaSnowflake, FaStar } from 'react-icons/fa';
 import Footer from './Footer';
+import Navbar from './Navigation';
 
 const ViewRoom = () => {
   const { roomId } = useParams();
@@ -58,7 +59,7 @@ const ViewRoom = () => {
       await addDoc(commentRef, {
         text: newComment,
         rating,
-        timestamp: serverTimestamp(), // ✅ Firebase server timestamp
+        timestamp: serverTimestamp(),
       });
 
       setNewComment('');
