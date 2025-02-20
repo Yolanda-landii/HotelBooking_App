@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { doc, onSnapshot, collection, addDoc, query, orderBy, serverTimestamp } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { FaWifi, FaSwimmer, FaParking, FaShieldAlt, FaUtensils, FaSnowflake, FaStar } from 'react-icons/fa';
+import Footer from './Footer';
 
 const ViewRoom = () => {
   const { roomId } = useParams();
@@ -161,9 +162,7 @@ const ViewRoom = () => {
           )}
         </div>
       </div>
-      <footer className="footer bg-gray-800 text-white p-4 text-center">
-      <p>Copyright © 2024 Hlala Nathi</p>
-      </footer>
+      <Footer/>
     </div>
   );
 };

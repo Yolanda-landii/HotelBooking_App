@@ -14,7 +14,7 @@ import BookingForm from './components/BookingForm';
 import ViewRoom from './components/ViewRoom';
 import CheckoutForm from './components/CheckoutForm';
 import AdminDashboard from './Pages/Admin/Admin';
-import BookingConfirmation from './components/BookingConfirmation';
+// import BookingConfirmation from './components/BookingConfirmation';
 import Profile from './Pages/User/UserProfile';
 import Bookings from './components/Bookings';
 import Reservations from './Pages/Admin/Reservations';
@@ -51,7 +51,7 @@ function App() {
         <Route path="/checkout" element={<Elements stripe={stripePromise}>
               <CheckoutForm />
             </Elements>} />
-        <Route path="/booking-confirmation" element={<BookingConfirmation />} />
+        {/* <Route path="/booking-confirmation" element={<BookingConfirmation />} /> */}
         <Route path="/profile" element={<Profile />} />
         {/* Admin Side Routes */}
         <Route path="/admin" element={

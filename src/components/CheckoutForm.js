@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
 import { useDispatch } from 'react-redux';
-import { useLocation,useNavigation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { createBooking } from '../redux/slices/bookingSlice';
 
 const CheckoutForm = () => {
   const stripe = useStripe();
-  const navigate = useNavigation()
+  const navigate = useNavigate()
   const location = useLocation();
   const elements = useElements();
   const dispatch = useDispatch();

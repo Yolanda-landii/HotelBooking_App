@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { createBooking } from '../redux/slices/bookingSlice';
 import { auth } from '../config/firebase';
+import Footer from './Footer';
 
 const BookingForm = () => {
   const navigate = useNavigate();
@@ -123,9 +124,7 @@ const BookingForm = () => {
           Next: Proceed to Payment
         </button>
       </div>
-      <footer className="footer bg-gray-800 text-white p-4 text-center mt-auto">
-        <p>Copyright © 2024 Hlala Nathi</p>
-      </footer>
+      <Footer/>
     </div>
   );
 };
