@@ -1,0 +1,179 @@
+import React, { useEffect, useState, useMemo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchRooms } from '../../redux/slices/roomSlice';
+import { fetchAllBookings } from '../../redux/slices/bookingSlice';
+import { db, auth } from '../../config/firebase';
+import { doc, getDoc, updateDoc,serverTimestamp,addDoc,collection } from 'firebase/firestore';
+import { signOut } from 'firebase/auth';
+import { useNavigate } from 'react-router-dom';
+
+const Reservations = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  // Fetch bookings from Redux state
+  const bookings = useSelector((state) => state.booking.bookings) || [];
+  const memoizedBookings = useMemo(() => bookings, [bookings]);
+  const [bookingsWithDetails, setBookingsWithDetails] = useState([]);
+
+  useEffect(() => {
+    dispatch(fetchRooms());
+    dispatch(fetchAllBookings());
+  }, [dispatch]);
+  
+  
+  useEffect(() => {
+    const fetchUserDetailsForBookings = async () => {
+      if (bookings.length > 0) {
+        const updatedBookings = await Promise.all(
+          bookings.map(async (booking) => {
+            try {
+              // Fetch user details from Firestore using the userId in the booking
+              const userDocRef = doc(db, 'users', booking.userId);
+              const userDocSnapshot = await getDoc(userDocRef);
+              const userData = userDocSnapshot.exists() ? userDocSnapshot.data() : null;
+
+              // Ensure booking has all necessary details
+              const bookingDetails = {
+                guestName: booking.guestName || 'N/A',
+                roomType: booking.roomType || 'N/A',
+                checkInDate: booking.checkin || 'N/A',
+                checkOutDate: booking.checkout || 'N/A',
+                status: booking.status || 'N/A'
+              };
+
+              // Add user details and booking details to the booking object
+              return { 
+                ...booking, 
+                user: userData,  // Attach user data
+                bookingDetails: bookingDetails  // Attach booking details (if needed)
+              };
+            } catch (error) {
+              console.error('Error fetching user details:', error);
+              return { ...booking, user: null, bookingDetails: null };
+            }
+          })
+        );
+        setBookingsWithDetails(updatedBookings);
+      }
+    };
+
+    fetchUserDetailsForBookings();
+  }, [bookings]); // Now `bookings` is used directly inside the effect
+
+  const sendNotification = async (recipientId, message) => {
+    try {
+      await addDoc(collection(db, "notifications"), {
+        recipientId,
+        message,
+        timestamp: serverTimestamp(),
+        status: "unread",
+      });
+    } catch (error) {
+      console.error("Error sending notification:", error);
+    }
+  };
+  const handleLogout = async () => {
+    await signOut(auth);
+    navigate('/login');
+  };
+
+  const handleApproveBooking = async (bookingId, userId) => {
+    try {
+      const bookingRef = doc(db, 'bookings', bookingId);
+      await updateDoc(bookingRef, { status: 'Approved' });
+  
+      
+      if (userId) {
+        await sendNotification(userId, "Your booking has been approved!");
+      }
+  
+      dispatch(fetchAllBookings());
+    } catch (error) {
+      console.error('Error approving booking:', error);
+    }
+  };
+  
+
+  const handleModifyBooking = async (bookingId, updatedDetails) => {
+    try {
+      const bookingRef = doc(db, 'bookings', bookingId);
+      await updateDoc(bookingRef, updatedDetails);
+      dispatch(fetchAllBookings()); // Refresh the bookings list
+    } catch (error) {
+      console.error('Error modifying booking:', error);
+    }
+  };
+
+  const handleCancelBooking = async (bookingId) => {
+    try {
+      const bookingRef = doc(db, 'bookings', bookingId);
+      await updateDoc(bookingRef, { status: 'Canceled' });
+      dispatch(fetchAllBookings()); // Refresh the bookings list
+    } catch (error) {
+      console.error('Error canceling booking:', error);
+    }
+  };
+
+  return (
+    <div className="flex flex-col min-h-screen">
+  <header className="header flex justify-between items-center p-4 bg-gray-900 text-white">
+    <div className="logo">
+      <img src="/images/logo.png" alt="Logo" className="w-24 h-auto" />
+    </div>
+    <nav className="nav">
+      <ul className="flex space-x-6">
+        <li><a href="/admin" className="hover:underline">Home</a></li>
+        <li><a href="/reservations" className="hover:underline">Reservations</a></li>
+        <li><button onClick={handleLogout} className="hover:underline">Logout</button></li>
+      </ul>
+    </nav>
+  </header>
+
+  {/* Manage Bookings */}
+  <div className="flex-grow mb-8 bg-white p-6 rounded-lg shadow-lg">
+    <h3 className="text-2xl font-semibold mb-4">Manage Bookings</h3>
+    {bookings.length === 0 ? (
+      <p>No bookings found.</p>
+    ) : (
+      bookingsWithDetails.map((booking) => (
+        <div key={booking.id} className="p-4 mb-4 border border-gray-200 rounded-lg shadow-sm bg-gray-50">
+          <p><strong>Guest Name:</strong> {booking.bookingDetails.guestName}</p>
+          <p><strong>Room:</strong> {booking.bookingDetails.roomType}</p>
+          <p><strong>Check-in:</strong> {booking.bookingDetails.checkInDate}</p>
+          <p><strong>Check-out:</strong> {booking.bookingDetails.checkOutDate}</p>
+          <p><strong>Status:</strong> {booking.bookingDetails.status}</p>
+
+          {/* Display user details */}
+          {booking.user && (
+            <div className="mt-2">
+              <p><strong>User Email:</strong> {booking.user.email}</p>
+              <p><strong>Phone:</strong> {booking.user.phone || 'N/A'}</p>
+            </div>
+          )}
+
+          <div className="flex gap-2 mt-4">
+          <button onClick={() => handleApproveBooking(booking.id, booking.userId)} className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+            Approve
+          </button>
+            <button onClick={() => handleModifyBooking(booking.id, { roomType: 'New Room Type' })} className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
+              Modify
+            </button>
+            <button onClick={() => handleCancelBooking(booking.id)} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+              Cancel
+            </button>
+          </div>
+        </div>
+      ))
+    )}
+  </div>
+
+  <footer className="footer bg-gray-800 text-white p-4 text-center mt-auto">
+    <p>Copyright © 2024 Hlala Nathi</p>
+  </footer>
+</div>
+
+  );
+};
+
+export default Reservations;
