@@ -57,7 +57,7 @@ const ViewRoom = () => {
       await addDoc(commentRef, {
         text: newComment,
         rating,
-        timestamp: serverTimestamp(), // ✅ Firebase server timestamp
+        timestamp: serverTimestamp(), 
       });
 
       setNewComment('');

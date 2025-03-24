@@ -3,8 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchRooms } from '../redux/slices/roomSlice';
 import { useNavigate, Link } from 'react-router-dom';
 import { collection, doc, getDoc, updateDoc, onSnapshot } from 'firebase/firestore';
-import { db, auth } from '../config/firebase';
-import { signOut } from 'firebase/auth';
+import { db} from '../config/firebase';
 import { FaHeart, FaRegHeart, FaShareAlt, FaStar } from 'react-icons/fa'; 
 import { MdLocationOn } from 'react-icons/md';
 import { updateFavorites } from '../redux/slices/userSlice'; 
@@ -18,7 +17,6 @@ const HotelListing = () => {
   const [rating, setRating] = useState({}); 
 
   useEffect(() => {
-    // Fetch hotels on component mount
     dispatch(fetchRooms());
 
     // Set up real-time listener
@@ -44,11 +42,6 @@ const HotelListing = () => {
   // Handle sorting
   const handleSortChange = (e) => {
     setSortOption(e.target.value);
-  };
-
-  const handleLogout = async () => {
-    await signOut(auth);
-    navigate('/login'); // Redirect to login page after logout
   };
 
   const handleLike = async (roomId) => {
@@ -133,6 +126,7 @@ const HotelListing = () => {
           <ul className="flex space-x-6">
               <li><a href="/" className="hover:underline">Home</a></li>
               <li><a href="/bookings" className="hover:underline">Bookings</a></li>
+              <li><a href="/messages" className="hover:underline">Messages</a></li>
               <li><a href="/profile" className="hover:underline">Profile</a></li>
               <li><Link to="/logout" className="hover:underline">Logout</Link></li>
           </ul>
