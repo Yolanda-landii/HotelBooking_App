@@ -110,10 +110,10 @@ function Register() {
             onChange={(e) => setConfirmPassword(e.target.value)} 
             className="w-full p-2 border border-gray-300 rounded-md"
           />
-          <select value={role} onChange={(e) => setRole(e.target.value)} className="w-full p-2 border border-gray-300 rounded-md">
+          {/* <select value={role} onChange={(e) => setRole(e.target.value)} className="w-full p-2 border border-gray-300 rounded-md">
             <option value="user">User</option>
             <option value="admin">Admin</option>
-          </select>
+          </select> */}
           <button
             type="submit"
             disabled={loading}
