@@ -9,7 +9,7 @@ const Logout = () => {
     const logoutUser = async () => {
       try {
         await auth.signOut(); 
-        navigate('/login'); 
+        navigate('/'); 
       } catch (error) {
         console.error('Error logging out:', error);
       }

@@ -3,12 +3,17 @@ import { useDispatch, useSelector } from 'react-redux';
 import { loginRequest, loginSuccess, loginFailure } from '../../redux/slices/userSlice';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../config/firebase';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation,useSearchParams } from 'react-router-dom';
 import { checkAdminStatus } from '../../utils/firabaseUtils';
 
-function Login() {
+function Login(props) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams ] = useSearchParams();
+  console.log(searchParams.get('redirectTo'));
+  const redirectTo =searchParams.get('redirectTo');
+  // const name = searchParams.get('name');
   const { loading, error } = useSelector(state => state.user);
 
   const [email, setEmail] = useState('');
@@ -29,7 +34,8 @@ function Login() {
         role: isAdmin ? 'admin' : 'user', 
       }));
 
-      navigate(isAdmin ? '/admin' : '/');
+      const destination = redirectTo || (isAdmin ? '/admin' : '/'); 
+      navigate(isAdmin ? '/admin' : destination, { state: location.state });
     } catch (error) {
       dispatch(loginFailure(error.message));
     }

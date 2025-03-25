@@ -3,6 +3,7 @@ import { db } from '../../config/firebase';
 import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { COLLECTIONS } from '../../constants/constants';
 
+
 export const fetchRooms = createAsyncThunk('rooms/fetchRooms', async (_, { rejectWithValue }) => {
   try {
     const querySnapshot = await getDocs(collection(db, COLLECTIONS.ROOMS));

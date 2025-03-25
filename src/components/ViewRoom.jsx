@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { doc, onSnapshot, collection, addDoc, query, orderBy, serverTimestamp } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db,auth } from '../config/firebase';
 import { FaWifi, FaSwimmer, FaParking, FaShieldAlt, FaUtensils, FaSnowflake, FaStar } from 'react-icons/fa';
 
 const ViewRoom = () => {
@@ -44,9 +44,14 @@ const ViewRoom = () => {
   }, [roomId]);
 
   const handleBooking = () => {
-    if (room) {
-        navigate(`/rooms/${roomId}/book`, { state: { room } });
+    console.log('We are booking');
+    const user = auth.currentUser;
+    if (!user) {
+      console.log('Redirecting to login page');
+      navigate(`/login?redirectTo=/rooms/${roomId}/book`, { state: { room } });
+      return;
     }
+    navigate(`/rooms/${roomId}/book`, { state: { room } });
   };
 
   const handleCommentSubmit = async () => {

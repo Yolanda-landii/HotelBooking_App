@@ -22,6 +22,7 @@ export const fetchUserBookings = createAsyncThunk(
   }
 );
 
+
 export const createBooking = createAsyncThunk(
   'booking/createBooking',
   async (bookingData, { rejectWithValue }) => {

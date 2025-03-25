@@ -15,6 +15,7 @@ const CheckoutForm = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  // const [bookingCreated, setBookingCreated] = useState(false);
 
   useEffect(() => {
     if (error) console.error("Payment Error:", error);
@@ -33,6 +34,7 @@ const CheckoutForm = () => {
     event.preventDefault();
     setLoading(true);
     setError(null);
+  
 
     if (!stripe || !elements) {
       setError('Stripe.js has not loaded yet.');

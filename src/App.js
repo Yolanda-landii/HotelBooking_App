@@ -29,39 +29,35 @@ function App() {
     <Router>
       <NotificationsProvider>
       <Routes>
-        {/* Public Routes */}
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/logout" element={<Logout />} />
-        
-        {/* User Side Routes */}
-        <Route 
-          path="/" 
-          element={
-            <PrivateRoute>
-              <HomePage />
-            </PrivateRoute>
-          }  
-        />
-        <Route path="/room/:roomId" element={<RoomDetails />} />
-        <Route path="/bookings" element={<Bookings />} />
-        <Route path="/rooms/:roomId" element={<ViewRoom />} />
-        <Route path="/rooms/:roomId/book" element={<BookingForm/>} />
-        <Route path="/messages" element={<Notifications/>} />
-        <Route path="/checkout" element={<Elements stripe={stripePromise}>
-              <CheckoutForm />
-            </Elements>} />
-        <Route path="/booking-confirmation" element={<BookingConfirmation />} />
-        <Route path="/profile" element={<Profile />} />
-        {/* Admin Side Routes */}
-        <Route path="/admin" element={
-          <AdminPrivateRoute>
-              <AdminDashboard />
-            </AdminPrivateRoute>
-          } 
-          />
-        <Route path='/reservations' element={<Reservations />} />
-      </Routes>
+  {/* Public Routes */}
+  <Route path="/" element={<HomePage />} />
+  <Route path="/register" element={<Register />} />
+  <Route path="/login" element={<Login />} />
+  <Route path="/logout" element={<Logout />} />
+
+  {/* Public Room Routes */}
+  <Route path="/room/:roomId" element={<RoomDetails />} />
+  <Route path="/rooms/:roomId" element={<ViewRoom />} />
+
+  {/* Restricted Booking Routes */}
+  <Route path="/rooms/:roomId/book" element={<PrivateRoute><BookingForm/></PrivateRoute>} />
+  <Route path="/checkout" element={
+    <Elements stripe={stripePromise}>
+      <CheckoutForm />
+    </Elements>
+  } />
+  <Route path="/booking-confirmation" element={<BookingConfirmation />} />
+
+  {/* User Routes */}
+  <Route path="/bookings" element={<PrivateRoute><Bookings /></PrivateRoute>} />
+  <Route path="/messages" element={<Notifications/>} />
+  <Route path="/profile" element={<Profile />} />
+
+  {/* Admin Routes */}
+  <Route path="/admin" element={<AdminPrivateRoute><AdminDashboard /></AdminPrivateRoute>} />
+  <Route path="/reservations" element={<Reservations />} />
+</Routes>
+
           </NotificationsProvider>
     </Router>
   );

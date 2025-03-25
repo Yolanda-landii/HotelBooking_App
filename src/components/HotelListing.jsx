@@ -18,7 +18,8 @@ const HotelListing = () => {
 
   useEffect(() => {
     dispatch(fetchRooms());
-
+    console.log("Fetching rooms...");
+  
     // Set up real-time listener
     const unsubscribe = onSnapshot(collection(db, 'rooms'), (snapshot) => {
       const updatedRooms = snapshot.docs.map((doc) => ({
@@ -26,7 +27,8 @@ const HotelListing = () => {
         ...doc.data(),
       }));
       dispatch({ type: 'rooms/fetchRooms/fulfilled', payload: updatedRooms });
-
+      console.log("Updated rooms: ", updatedRooms);  // Log real-time data
+  
       // Initialize rating state
       const ratings = {};
       updatedRooms.forEach((room) => {
@@ -34,10 +36,11 @@ const HotelListing = () => {
       });
       setRating(ratings);
     });
-
+  
     // Cleanup listener on unmount
     return () => unsubscribe();
   }, [dispatch]);
+  
 
   // Handle sorting
   const handleSortChange = (e) => {

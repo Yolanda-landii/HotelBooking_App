@@ -13,9 +13,11 @@ const Bookings = () => {
 
   useEffect(() => {
     if (currentUser) {
+      console.log("Fetching bookings for user:", currentUser.uid); // Log to check if currentUser has UID
       dispatch(fetchUserBookings(currentUser.uid)); 
     }
   }, [dispatch, currentUser]);
+  
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
