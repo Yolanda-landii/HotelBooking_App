@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { createBooking } from '../redux/slices/bookingSlice';
 import { auth } from '../config/firebase';
+import Navigation from './Navigation';
 
 const BookingForm = () => {
   const navigate = useNavigate();
@@ -57,20 +58,7 @@ const BookingForm = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6">
-      <header className="w-full bg-gray-900 text-white p-4 flex justify-between items-center shadow-md">
-        <div className="logo">
-          <img src="/images/logo.png" alt="Logo" className="w-24 h-auto" />
-        </div>
-        <nav>
-          <ul className="flex space-x-6">
-            <li><Link to="/" className="hover:underline">Home</Link></li>
-            <li><a href="/bookings" className="hover:underline">Bookings</a></li>
-            <li><a href="/messages" className="hover:underline">Messages</a></li>
-            <li><Link to="/profile" className="hover:underline">Profile</Link></li>
-            <li><Link to="/logout" className="hover:underline">Logout</Link></li>
-          </ul>
-        </nav>
-      </header>
+      <Navigation />
       
       <div className="bg-white shadow-lg rounded-lg p-6 mt-8 w-full max-w-lg">
         <h2 className="text-xl font-semibold text-center mb-4">Booking for {room.name}</h2>

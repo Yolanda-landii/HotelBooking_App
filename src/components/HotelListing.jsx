@@ -7,6 +7,7 @@ import { db} from '../config/firebase';
 import { FaHeart, FaRegHeart, FaShareAlt, FaStar } from 'react-icons/fa'; 
 import { MdLocationOn } from 'react-icons/md';
 import { updateFavorites } from '../redux/slices/userSlice'; 
+import Navigation from './Navigation';
 
 const HotelListing = () => {
   const dispatch = useDispatch();
@@ -121,20 +122,7 @@ const HotelListing = () => {
 
   return (
     <div className="hotel-listing flex flex-col min-h-screen">
-      <header className="header flex justify-between items-center p-4 bg-gray-900 text-white">
-          <div className="logo">
-          <img src="/images/logo.png" alt="Logo" className="w-24 h-auto" />
-          </div>
-          <nav className="nav">
-          <ul className="flex space-x-6">
-              <li><a href="/" className="hover:underline">Home</a></li>
-              <li><a href="/bookings" className="hover:underline">Bookings</a></li>
-              <li><a href="/messages" className="hover:underline">Messages</a></li>
-              <li><a href="/profile" className="hover:underline">Profile</a></li>
-              <li><Link to="/logout" className="hover:underline">Logout</Link></li>
-          </ul>
-          </nav>
-      </header>
+      <Navigation />
 
       {/* Search/Filter Section */}
       <section className="search-filter bg-white p-6 shadow-md border border-gray-200">

@@ -79,7 +79,7 @@ const handleSubmit = async (e) => {
 
   const handleLogout = async () => {
     await signOut(auth);
-    navigate('/login');
+    navigate('/');
   };
 
   return (
@@ -92,6 +92,7 @@ const handleSubmit = async (e) => {
           <ul className="flex space-x-6">
             <li><Link to="/" className="hover:underline">Home</Link></li>
             <li><Link to="/bookings" className="hover:underline">Bookings</Link></li>
+            <li><Link to="/messages" className="hover:underline">Messages</Link></li>
             <li><Link to="/profile" className="hover:underline">Profile</Link></li>
             <li><button onClick={handleLogout} className="hover:underline">Logout</button></li>
           </ul>
