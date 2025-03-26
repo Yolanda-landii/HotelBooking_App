@@ -7,10 +7,10 @@ const Navigation = () => {
   const { currentUser } = useAuth();
 
   return (
-    <header className="header flex justify-between items-center p-4 bg-gray-900 text-white">
+    <header className="header flex justify-between items-center p-2 bg-gray-900 text-white">
       <div className="logo">
         <Link to="/">
-          <img src="/images/logo.png" alt="Logo" className="w-24 h-auto" />
+          <img src="/images/logo.png" alt="Logo" className="w-20 h-auto" />
         </Link>
       </div>
       <nav className="nav">
