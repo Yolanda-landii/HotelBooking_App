@@ -18,6 +18,7 @@ import BookingConfirmation from './components/BookingConfirmation';
 import Profile from './Pages/User/UserProfile';
 import Bookings from './components/Bookings';
 import Reservations from './Pages/Admin/Reservations';
+import Favorites from './components/Favorites';
 
 const stripePromise = loadStripe('pk_test_51PyWUREMz50nif55fK8C9cxOdEly9YE9oI3FSiPamkRbdehoxGezQa8sunPYYuqKDmwZPKhsmqZDeBOSmgkZPhhg00hcETCYXE');
 
@@ -54,6 +55,7 @@ function App() {
   <Route path="/bookings" element={<PrivateRoute><Bookings /></PrivateRoute>} />
   <Route path="/messages" element={<PrivateRoute><Messages /></PrivateRoute>} />
   <Route path="/profile" element={<Profile />} />
+  <Route path="/favorites" element={<PrivateRoute><Favorites /></PrivateRoute>} />
 
   {/* Admin Routes */}
   <Route path="/admin" element={<AdminPrivateRoute><AdminDashboard /></AdminPrivateRoute>} />

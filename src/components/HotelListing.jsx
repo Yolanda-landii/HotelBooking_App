@@ -6,17 +6,35 @@ import { collection, doc, getDoc, updateDoc, onSnapshot } from 'firebase/firesto
 import { db } from '../config/firebase';
 import { FaHeart, FaRegHeart, FaShareAlt, FaStar } from 'react-icons/fa'; 
 // import { MdLocationOn } from 'react-icons/md';
+import { useAuth } from '../contexts/AuthContext';
 import { updateFavorites } from '../redux/slices/userSlice'; 
 import Navigation from './Navigation';
 
 const HotelListing = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const roomsState = useSelector((state) => state.rooms);
   const { rooms = [], loading = false, error = null } = roomsState || {};
-  const user = useSelector((state) => state.user?.user); 
   const [sortOption, setSortOption] = useState('');
-  const [rating, setRating] = useState({}); 
+  const [rating, setRating] = useState({});
+  const [userFavorites, setUserFavorites] = useState([]);
+
+  useEffect(() => {
+    const fetchUserFavorites = async () => {
+      if (!currentUser) return;
+      try {
+        const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+        if (userDoc.exists()) {
+          setUserFavorites(userDoc.data().favorites || []);
+        }
+      } catch (error) {
+        console.error('Error fetching user favorites:', error);
+      }
+    };
+
+    fetchUserFavorites();
+  }, [currentUser]);
 
   useEffect(() => {
     dispatch(fetchRooms());
@@ -50,30 +68,41 @@ const HotelListing = () => {
   };
 
   const handleLike = async (roomId) => {
-    if (!user) {
-      alert('You need to be logged in to like a hotel');
+    if (!currentUser) {
+      navigate('/login', { state: { message: 'You need to be logged in to add a room to favorites' } });
       return;
     }
 
     try {
-      const userRef = doc(db, 'users', user.uid);
+      const userRef = doc(db, 'users', currentUser.uid);
       const userDoc = await getDoc(userRef);
-      const userFavorites = userDoc.data()?.favorites || [];
-      const isFavorite = userFavorites.includes(roomId);
+      const favorites = userDoc.data()?.favorites || [];
+      const isFavorite = favorites.includes(roomId);
 
+      // Update Firestore
       await updateDoc(userRef, {
         favorites: isFavorite
-          ? userFavorites.filter((id) => id !== roomId)
-          : [...userFavorites, roomId],
+          ? favorites.filter((id) => id !== roomId)
+          : [...favorites, roomId],
       });
 
-      dispatch(updateFavorites(isFavorite
-        ? userFavorites.filter((id) => id !== roomId)
-        : [...userFavorites, roomId]));
+      // Update local state
+      setUserFavorites(isFavorite
+        ? favorites.filter((id) => id !== roomId)
+        : [...favorites, roomId]);
 
-      console.log(isFavorite ? `Removed room ${roomId} from favorites` : `Added hotel ${roomId} to favorites`);
+      // Update Redux state
+      dispatch(updateFavorites({
+        hotelId: roomId,
+        actionType: isFavorite ? 'remove' : 'add'
+      }));
+
+      // Force a re-render of the rooms to update the heart icons
+      dispatch(fetchRooms());
+
+      console.log(isFavorite ? `Removed room ${roomId} from favorites` : `Added room ${roomId} to favorites`);
     } catch (error) {
-      console.error('Error liking hotel: ', error);
+      console.error('Error updating favorites: ', error);
     }
   };
 
@@ -152,18 +181,22 @@ const HotelListing = () => {
       <section className="hotel-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6">
   {sortedRooms.map((room) => (
     <div key={room.id} className="hotel-card bg-white p-4 shadow-lg rounded-md border border-gray-200">
-      <img src={room.imageUrl} alt={room.name} className="hotel-image w-full h-48 object-cover rounded-md mb-4" />
+      <div className="relative">
+        <img src={room.imageUrl} alt={room.name} className="hotel-image w-full h-48 object-cover rounded-md mb-4" />
+        <div className="absolute top-2 right-2">
+        </div>
+      </div>
       <h3 className="hotel-name text-xl font-bold">{room.name}</h3>
       <p className="hotel-price text-lg text-blue-600 mt-2">R{room.price}</p>
       
       <div className="flex items-center mt-3">
-        <button className="like-button text-red-500 hover:text-red-600" onClick={() => handleLike(room.id)}>
-          {user?.favorites?.includes(room.id) ? (
-            <FaHeart className="w-6 h-6 text-red-500" />
-          ) : (
-            <FaRegHeart className="w-6 h-6 text-gray-400" />
-          )}
-        </button>
+          <button className="like-button" onClick={() => handleLike(room.id)}>
+            {userFavorites.includes(room.id) ? (
+              <FaHeart className="w-6 h-6 text-red-500 hover:text-red-600" />
+            ) : (
+              <FaRegHeart className="w-6 h-6 text-gray-400 hover:text-red-500" />
+            )}
+          </button>
         <button className="share-button text-blue-500 hover:text-blue-600 ml-4" onClick={() => handleShare(room.id)}>
           <FaShareAlt className="w-6 h-6" />
         </button>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { FaHeart } from 'react-icons/fa';
 
 const Navigation = () => {
   const { currentUser } = useAuth();
@@ -18,6 +19,10 @@ const Navigation = () => {
           {currentUser ? (
             <>
               <li><Link to="/bookings" className="hover:underline">Bookings</Link></li>
+              <li><Link to="/favorites" className="hover:underline flex items-center">
+                <FaHeart className="mr-1" />
+                Favorites
+              </Link></li>
               <li><Link to="/messages" className="hover:underline">Messages</Link></li>
               <li><Link to="/profile" className="hover:underline">Profile</Link></li>
               <li><Link to="/logout" className="hover:underline">Logout</Link></li>

@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import { doc, onSnapshot, collection, addDoc, query, orderBy, serverTimestamp } from 'firebase/firestore';
-import { db,auth } from '../config/firebase';
-import { FaWifi, FaSwimmer, FaParking, FaShieldAlt, FaUtensils, FaSnowflake, FaStar, FaShare } from 'react-icons/fa';
+import { doc, onSnapshot, collection, addDoc, query, orderBy, serverTimestamp, getDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
+import { db } from '../config/firebase';
+import { FaWifi, FaSwimmer, FaParking, FaShieldAlt, FaUtensils, FaSnowflake, FaStar, FaShare, FaHeart, FaRegHeart } from 'react-icons/fa';
 import Navigation from './Navigation';
+import { useAuth } from '../contexts/AuthContext';
+import BookingForm from './BookingForm';
 
 const ViewRoom = () => {
   const { roomId } = useParams();
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const [room, setRoom] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
@@ -16,14 +19,16 @@ const ViewRoom = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showShareMessage, setShowShareMessage] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
     const roomRef = doc(db, 'rooms', roomId);
     const unsubscribeRoom = onSnapshot(roomRef, (docSnapshot) => {
       if (docSnapshot.exists()) {
         const roomData = docSnapshot.data();
-        if (roomData.facilities && typeof roomData.facilities === 'string') {
-          roomData.facilities = roomData.facilities.split(',').map((facility) => facility.trim());
+        // Ensure facilities is always an array
+        if (!Array.isArray(roomData.facilities)) {
+          roomData.facilities = roomData.facilities ? roomData.facilities.split(',').map(f => f.trim()) : [];
         }
         setRoom(roomData);
       } else {
@@ -45,9 +50,43 @@ const ViewRoom = () => {
     };
   }, [roomId]);
 
+  useEffect(() => {
+    const fetchRoom = async () => {
+      try {
+        const roomDoc = await getDoc(doc(db, 'rooms', roomId));
+        if (!roomDoc.exists()) {
+          setError('Room not found');
+          return;
+        }
+        const roomData = roomDoc.data();
+        // Ensure facilities is always an array
+        if (!Array.isArray(roomData.facilities)) {
+          roomData.facilities = roomData.facilities ? roomData.facilities.split(',').map(f => f.trim()) : [];
+        }
+        setRoom({ id: roomDoc.id, ...roomData });
+        
+        // Check if room is in user's favorites
+        if (currentUser) {
+          const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+          if (userDoc.exists()) {
+            const favorites = userDoc.data().favorites || [];
+            setIsFavorite(favorites.includes(roomId));
+          }
+        }
+      } catch (err) {
+        setError('Error fetching room details');
+        console.error('Error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRoom();
+  }, [roomId, currentUser]);
+
   const handleBooking = () => {
     console.log('We are booking');
-    const user = auth.currentUser;
+    const user = currentUser;
     if (!user) {
       console.log('Redirecting to login page');
       navigate(`/login?redirectTo=/rooms/${roomId}/book`, { state: { room } });
@@ -86,19 +125,44 @@ const ViewRoom = () => {
     }
   };
 
-  const handleShare = async () => {
-    const roomUrl = `https://hotel-booking-app-pink-six.vercel.app/rooms/${roomId}`;
+  const handleFavorite = async () => {
+    if (!currentUser) {
+      navigate('/login', { state: { message: 'You need to be logged in to add a room to favorites' } });
+      return;
+    }
+
     try {
-      await navigator.clipboard.writeText(roomUrl);
+      const userRef = doc(db, 'users', currentUser.uid);
+      if (isFavorite) {
+        await updateDoc(userRef, {
+          favorites: arrayRemove(roomId)
+        });
+      } else {
+        await updateDoc(userRef, {
+          favorites: arrayUnion(roomId)
+        });
+      }
+      setIsFavorite(!isFavorite);
+    } catch (err) {
+      console.error('Error updating favorites:', err);
+      setError('Error updating favorites');
+    }
+  };
+
+  const handleShare = async () => {
+    const url = `https://hotel-booking-app-pink-six.vercel.app/rooms/${roomId}`;
+    try {
+      await navigator.clipboard.writeText(url);
       setShowShareMessage(true);
       setTimeout(() => setShowShareMessage(false), 3000);
     } catch (err) {
-      console.error('Failed to copy URL:', err);
+      console.error('Error copying to clipboard:', err);
     }
   };
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
+  if (!room) return <p>Room not found</p>;
 
   return (
     <div className="room-details p-6">
@@ -107,6 +171,17 @@ const ViewRoom = () => {
         <h1 className="text-2xl font-bold">{room.name}</h1>
         <div className="flex items-center space-x-4">
           <p className="text-xl text-blue-600">R{room.price}</p>
+          <button
+            onClick={handleFavorite}
+            className="p-2 text-gray-600 hover:text-red-500 transition-colors"
+            title="Add to Favorites"
+          >
+            {isFavorite ? (
+              <FaHeart size={20} className="text-red-500" />
+            ) : (
+              <FaRegHeart size={20} />
+            )}
+          </button>
           <button
             onClick={handleShare}
             className="p-2 text-gray-600 hover:text-blue-600 transition-colors"
@@ -127,7 +202,7 @@ const ViewRoom = () => {
       <p>{room.description}</p>
       <h2 className="text-xl font-semibold">Facilities</h2>
       <ul>
-        {room.facilities.map((facility, index) => (
+        {Array.isArray(room.facilities) && room.facilities.map((facility, index) => (
           <li key={index} className="flex items-center space-x-4">
             {getFacilityIcon(facility)}
             <p>{facility}</p>
@@ -186,6 +261,18 @@ const ViewRoom = () => {
       <footer className="footer bg-gray-800 text-white p-4 text-center">
         <p>Copyright © 2024 Hlala Nathi</p>
       </footer>
+
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold mb-2">Amenities</h2>
+        <div className="grid grid-cols-2 gap-2">
+          {Array.isArray(room.facilities) && room.facilities.map((amenity, index) => (
+            <div key={index} className="flex items-center">
+              <span className="text-green-500 mr-2">✓</span>
+              {amenity}
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };

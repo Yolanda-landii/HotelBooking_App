@@ -9,11 +9,11 @@ const favoritesSlice = createSlice({
         return action.payload;
       },
       toggleFavorite(state, action) {
-        const hotelId = action.payload;
-        if (state.includes(hotelId)) {
-          return state.filter(id => id !== hotelId);
+        const roomId = action.payload;
+        if (state.includes(roomId)) {
+          return state.filter(id => id !== roomId);
         } else {
-          state.push(hotelId);
+          state.push(roomId);
         }
       }
     },
