@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { doc, onSnapshot, collection, addDoc, query, orderBy, serverTimestamp } from 'firebase/firestore';
 import { db,auth } from '../config/firebase';
-import { FaWifi, FaSwimmer, FaParking, FaShieldAlt, FaUtensils, FaSnowflake, FaStar } from 'react-icons/fa';
+import { FaWifi, FaSwimmer, FaParking, FaShieldAlt, FaUtensils, FaSnowflake, FaStar, FaShare } from 'react-icons/fa';
 import Navigation from './Navigation';
 
 const ViewRoom = () => {
@@ -15,6 +15,7 @@ const ViewRoom = () => {
   const [rating, setRating] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showShareMessage, setShowShareMessage] = useState(false);
 
   useEffect(() => {
     const roomRef = doc(db, 'rooms', roomId);
@@ -85,14 +86,43 @@ const ViewRoom = () => {
     }
   };
 
+  const handleShare = async () => {
+    const roomUrl = `https://hotel-booking-app-pink-six.vercel.app/rooms/${roomId}`;
+    try {
+      await navigator.clipboard.writeText(roomUrl);
+      setShowShareMessage(true);
+      setTimeout(() => setShowShareMessage(false), 3000);
+    } catch (err) {
+      console.error('Failed to copy URL:', err);
+    }
+  };
+
   if (loading) return <p>Loading...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
   return (
     <div className="room-details p-6">
       <Navigation />
-      <h1 className="text-2xl font-bold">{room.name}</h1>
-      <p className="text-xl text-blue-600">R{room.price}</p>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">{room.name}</h1>
+        <div className="flex items-center space-x-4">
+          <p className="text-xl text-blue-600">R{room.price}</p>
+          <button
+            onClick={handleShare}
+            className="p-2 text-gray-600 hover:text-blue-600 transition-colors"
+            title="Share Room"
+          >
+            <FaShare size={20} />
+          </button>
+        </div>
+      </div>
+
+      {showShareMessage && (
+        <div className="fixed top-20 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg z-50">
+          Room URL copied to clipboard!
+        </div>
+      )}
+
       <img src={room.imageUrl} alt={room.name} className="w-full h-64 object-cover rounded-md my-4" />
       <p>{room.description}</p>
       <h2 className="text-xl font-semibold">Facilities</h2>
@@ -119,7 +149,6 @@ const ViewRoom = () => {
             <FaStar 
               key={star} 
               className={`cursor-pointer ${rating >= star ? 'text-yellow-400' : 'text-gray-400'}`}
-
               onClick={() => setRating(star)}
             />
           ))}
@@ -155,7 +184,7 @@ const ViewRoom = () => {
         </div>
       </div>
       <footer className="footer bg-gray-800 text-white p-4 text-center">
-      <p>Copyright © 2024 Hlala Nathi</p>
+        <p>Copyright © 2024 Hlala Nathi</p>
       </footer>
     </div>
   );

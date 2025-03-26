@@ -5,7 +5,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { collection, doc, getDoc, updateDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { FaHeart, FaRegHeart, FaShareAlt, FaStar } from 'react-icons/fa'; 
-import { MdLocationOn } from 'react-icons/md';
+// import { MdLocationOn } from 'react-icons/md';
 import { updateFavorites } from '../redux/slices/userSlice'; 
 import Navigation from './Navigation';
 
@@ -78,7 +78,8 @@ const HotelListing = () => {
   };
 
   const handleShare = (roomId) => {
-    const roomUrl = `http://your-app-url/hotel-details/${roomId}`;
+    const roomUrl = `https://hotel-booking-app-pink-six.vercel.app/rooms/${roomId}`;
+    
 
     if (navigator.share) {
       navigator.share({
@@ -154,10 +155,7 @@ const HotelListing = () => {
       <img src={room.imageUrl} alt={room.name} className="hotel-image w-full h-48 object-cover rounded-md mb-4" />
       <h3 className="hotel-name text-xl font-bold">{room.name}</h3>
       <p className="hotel-price text-lg text-blue-600 mt-2">R{room.price}</p>
-      <p className="hotel-distance text-sm text-gray-500 mt-1">
-        <MdLocationOn className="inline mr-1" />
-        {room.distance} km away
-      </p>
+      
       <div className="flex items-center mt-3">
         <button className="like-button text-red-500 hover:text-red-600" onClick={() => handleLike(room.id)}>
           {user?.favorites?.includes(room.id) ? (
