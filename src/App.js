@@ -5,7 +5,7 @@ import Register from './Pages/User/Register';
 import Login from './Pages/User/Login';
 import HomePage from './Pages/User/HomePage';
 import { NotificationsProvider } from "./contexts/NotificationsContext";
-import Notifications from './components/Messages';
+import Messages from './components/Messages';
 import PrivateRoute from './components/PrivateRoute';
 import AdminPrivateRoute from './components/Admin/AdminPrivateRoute';
 import RoomDetails from './components/RoomDetails';
@@ -42,20 +42,22 @@ function App() {
   {/* Restricted Booking Routes */}
   <Route path="/rooms/:roomId/book" element={<PrivateRoute><BookingForm/></PrivateRoute>} />
   <Route path="/checkout" element={
-    <Elements stripe={stripePromise}>
-      <CheckoutForm />
-    </Elements>
+    <PrivateRoute>
+      <Elements stripe={stripePromise}>
+        <CheckoutForm />
+      </Elements>
+    </PrivateRoute>
   } />
-  <Route path="/booking-confirmation" element={<BookingConfirmation />} />
+  <Route path="/booking-confirmation" element={<PrivateRoute><BookingConfirmation /></PrivateRoute>} />
 
   {/* User Routes */}
   <Route path="/bookings" element={<PrivateRoute><Bookings /></PrivateRoute>} />
-  <Route path="/messages" element={<Notifications/>} />
+  <Route path="/messages" element={<PrivateRoute><Messages /></PrivateRoute>} />
   <Route path="/profile" element={<Profile />} />
 
   {/* Admin Routes */}
   <Route path="/admin" element={<AdminPrivateRoute><AdminDashboard /></AdminPrivateRoute>} />
-  <Route path="/reservations" element={<Reservations />} />
+  <Route path="/reservations" element={<AdminPrivateRoute><Reservations /></AdminPrivateRoute>} />
 </Routes>
 
           </NotificationsProvider>

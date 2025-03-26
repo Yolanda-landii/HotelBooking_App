@@ -1,22 +1,21 @@
-// redux/store.js
+// redux/Store.js
 import { configureStore } from '@reduxjs/toolkit';
-import userReducer from './slices/userSlice';
-import roomReducer from './slices/roomSlice';
+import authReducer from './slices/authSlice';
 import bookingReducer from './slices/bookingSlice';
+import roomReducer from './slices/roomSlice';
+import userReducer from './slices/userSlice';
 import favoritesReducer from './slices/favoritesSlice';
 import reservationsReducer from './slices/reservationsSlice';
 
-
-const store = configureStore({
+export const store = configureStore({
   reducer: {
-    user: userReducer,
-    rooms: roomReducer,
+    auth: authReducer,
     booking: bookingReducer,
+    rooms: roomReducer,
+    user: userReducer,
     favorites: favoritesReducer,
-    reservations:reservationsReducer,
-    
+    reservations: reservationsReducer
   },
-  // Disable the non-serializable value check (not recommended)
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,

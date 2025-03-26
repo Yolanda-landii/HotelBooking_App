@@ -1,23 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { collection, query, orderBy, onSnapshot, doc, updateDoc } from 'firebase/firestore';
-import { db, auth } from '../config/firebase';
+import { collection, query, where, orderBy, onSnapshot, doc, updateDoc } from 'firebase/firestore';
+import { db } from '../config/firebase';
 import Navigation from './Navigation';
-import { useAuth } from '../contexts/AuthContext';
 
-const Messages = () => {
+const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const { currentUser } = useAuth();
+  const user = useSelector(state => state.auth.user);
 
   useEffect(() => {
-    if (!currentUser?.uid) {
-      setLoading(false);
-      return;
-    }
+    if (!user?.uid) return;
 
-    const notificationsRef = collection(db, 'users', currentUser.uid, 'notifications');
+    const notificationsRef = collection(db, 'users', user.uid, 'notifications');
     const q = query(notificationsRef, orderBy('createdAt', 'desc'));
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -37,13 +33,11 @@ const Messages = () => {
     });
 
     return () => unsubscribe();
-  }, [currentUser]);
+  }, [user]);
 
   const markAsRead = async (notificationId) => {
-    if (!currentUser?.uid) return;
-    
     try {
-      const notificationRef = doc(db, 'users', currentUser.uid, 'notifications', notificationId);
+      const notificationRef = doc(db, 'users', user.uid, 'notifications', notificationId);
       await updateDoc(notificationRef, {
         read: true
       });
@@ -68,7 +62,7 @@ const Messages = () => {
       <Navigation />
       
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">Messages</h1>
+        <h1 className="text-3xl font-bold mb-6">Notifications</h1>
         
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -78,7 +72,7 @@ const Messages = () => {
 
         {notifications.length === 0 ? (
           <div className="bg-white rounded-lg shadow-md p-6 text-center">
-            <p className="text-gray-500">No messages yet</p>
+            <p className="text-gray-500">No notifications yet</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -112,4 +106,4 @@ const Messages = () => {
   );
 };
 
-export default Messages;
+export default Notifications; 

@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchRooms } from '../redux/slices/roomSlice';
 import { useNavigate, Link } from 'react-router-dom';
 import { collection, doc, getDoc, updateDoc, onSnapshot } from 'firebase/firestore';
-import { db} from '../config/firebase';
+import { db } from '../config/firebase';
 import { FaHeart, FaRegHeart, FaShareAlt, FaStar } from 'react-icons/fa'; 
 import { MdLocationOn } from 'react-icons/md';
 import { updateFavorites } from '../redux/slices/userSlice'; 
@@ -12,8 +12,9 @@ import Navigation from './Navigation';
 const HotelListing = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { rooms, loading, error } = useSelector((state) => state.rooms);
-  const user = useSelector((state) => state.user.user); 
+  const roomsState = useSelector((state) => state.rooms);
+  const { rooms = [], loading = false, error = null } = roomsState || {};
+  const user = useSelector((state) => state.user?.user); 
   const [sortOption, setSortOption] = useState('');
   const [rating, setRating] = useState({}); 
 

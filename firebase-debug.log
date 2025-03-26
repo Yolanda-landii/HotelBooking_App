@@ -1,0 +1,52 @@
+[debug] [2025-03-26T00:30:04.781Z] ----------------------------------------------------------------------
+[debug] [2025-03-26T00:30:04.793Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\landi\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js init firestore
+[debug] [2025-03-26T00:30:04.794Z] CLI Version:   13.16.0
+[debug] [2025-03-26T00:30:04.794Z] Platform:      win32
+[debug] [2025-03-26T00:30:04.794Z] Node Version:  v20.15.1
+[debug] [2025-03-26T00:30:04.794Z] Time:          Wed Mar 26 2025 02:30:04 GMT+0200 (South Africa Standard Time)
+[debug] [2025-03-26T00:30:04.794Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-03-26T00:30:04.798Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[debug] [2025-03-26T00:30:05.025Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-03-26T00:30:05.026Z] > authorizing via signed-in user (landiimabotja2000@gmail.com)
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  C:\Users\landi\Documents\React\HotelBooking_App
+
+Before we get started, keep in mind:
+
+  * You are initializing within an existing Firebase project directory
+
+[debug] [2025-03-26T00:30:06.186Z] <<< [apiv2][status] GET https://firebase-public.firebaseio.com/cli.json 200
+[debug] [2025-03-26T00:30:06.188Z] <<< [apiv2][body] GET https://firebase-public.firebaseio.com/cli.json {"cloudBuildErrorAfter":1594252800000,"cloudBuildWarnAfter":1590019200000,"defaultNode10After":1594252800000,"minVersion":"3.0.5","node8DeploysDisabledAfter":1613390400000,"node8RuntimeDisabledAfter":1615809600000,"node8WarnAfter":1600128000000}
+[info] 
+=== Project Setup
+[info] 
+[info] First, let's associate this project directory with a Firebase project.
+[info] You can create multiple project aliases by running firebase use --add, 
+[info] but for now we'll just set up a default project.
+[info] 
+[debug] [2025-03-26T00:30:20.806Z] Using project from CLI flag: hotel-booking-app-932bd
+[debug] [2025-03-26T00:30:20.807Z] > refreshing access token with scopes: []
+[debug] [2025-03-26T00:30:20.808Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-03-26T00:30:20.808Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-03-26T00:30:22.274Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-03-26T00:30:22.274Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-03-26T00:30:22.290Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/hotel-booking-app-932bd [none]
+[debug] [2025-03-26T00:30:23.386Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/hotel-booking-app-932bd 200
+[debug] [2025-03-26T00:30:23.387Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/hotel-booking-app-932bd {"projectId":"hotel-booking-app-932bd","projectNumber":"520041531578","displayName":"Hotel-Booking-App","name":"projects/hotel-booking-app-932bd","resources":{"hostingSite":"hotel-booking-app-932bd","locationId":"us-central"},"state":"ACTIVE","etag":"1_48935fff-4579-47aa-9712-d4a6537340c3"}
+[info] i  Using project hotel-booking-app-932bd (Hotel-Booking-App) 
+[info] 
+=== Firestore Setup
+[debug] [2025-03-26T00:30:23.399Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/hotel-booking-app-932bd/services/firestore.googleapis.com [none]
+[debug] [2025-03-26T00:30:23.399Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/hotel-booking-app-932bd/services/firestore.googleapis.com x-goog-quota-user=projects/hotel-booking-app-932bd
+[debug] [2025-03-26T00:30:25.940Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/hotel-booking-app-932bd/services/firestore.googleapis.com 200
+[debug] [2025-03-26T00:30:25.940Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/hotel-booking-app-932bd/services/firestore.googleapis.com [omitted]
+[debug] [2025-03-26T00:30:25.941Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/hotel-booking-app-932bd/databases/(default) [none]

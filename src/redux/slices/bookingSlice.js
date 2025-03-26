@@ -22,16 +22,23 @@ export const fetchUserBookings = createAsyncThunk(
   }
 );
 
-
 export const createBooking = createAsyncThunk(
   'booking/createBooking',
-  async (bookingData, { rejectWithValue }) => {
+  async (bookingData) => {
     try {
-      const newBooking = { ...bookingData, status: 'pending' }; // Default status
-      const docRef = await addDoc(collection(db, 'bookings'), newBooking);
-      return { id: docRef.id, ...newBooking };
+      const bookingRef = await addDoc(collection(db, 'bookings'), {
+        ...bookingData,
+        status: 'pending',
+        createdAt: new Date().toISOString()
+      });
+      return {
+        id: bookingRef.id,
+        ...bookingData,
+        status: 'pending',
+        createdAt: new Date().toISOString()
+      };
     } catch (error) {
-      return rejectWithValue(error.message);
+      throw error;
     }
   }
 );
@@ -66,28 +73,47 @@ export const fetchAllBookings = createAsyncThunk(
   'booking/fetchAllBookings',
   async (_, { rejectWithValue }) => {
     try {
-      // Fetch all bookings
-      const querySnapshot = await getDocs(collection(db, 'bookings'));
-      const bookings = await Promise.all(
-        querySnapshot.docs.map(async (bookingDoc) => {
-          const bookingData = bookingDoc.data();
-          const bookingId = bookingDoc.id;
+      console.log('Fetching all bookings...');
+      // Get all bookings
+      const bookingsSnapshot = await getDocs(collection(db, 'bookings'));
+      
+      if (bookingsSnapshot.empty) {
+        console.log('No bookings found');
+        return [];
+      }
 
-          // Fetch user details using the userId from the booking data
-          const userRef = doc(db, 'users', bookingData.userId);
-          const userSnapshot = await getDoc(userRef);
-          const userData = userSnapshot.exists() ? userSnapshot.data() : {};
+      // Map through bookings and fetch user details for each
+      const bookingsWithUsers = await Promise.all(
+        bookingsSnapshot.docs.map(async (bookingDoc) => {
+          const booking = { id: bookingDoc.id, ...bookingDoc.data() };
+          console.log('Processing booking:', booking);
 
-          return {
-            id: bookingId,
-            ...bookingData,
-            user: userData,
-          };
+          if (booking.userId) {
+            try {
+              const userDoc = await getDoc(doc(db, 'users', booking.userId));
+              if (userDoc.exists()) {
+                booking.user = userDoc.data();
+              } else {
+                console.log('User not found for booking:', booking.id);
+                booking.user = { displayName: 'Unknown User', email: 'No email' };
+              }
+            } catch (error) {
+              console.error('Error fetching user for booking:', booking.id, error);
+              booking.user = { displayName: 'Error loading user', email: 'Error loading email' };
+            }
+          } else {
+            console.log('No userId for booking:', booking.id);
+            booking.user = { displayName: 'No User', email: 'No email' };
+          }
+
+          return booking;
         })
       );
 
-      return bookings;
+      console.log('Fetched bookings with users:', bookingsWithUsers);
+      return bookingsWithUsers;
     } catch (error) {
+      console.error('Error in fetchAllBookings:', error);
       return rejectWithValue(error.message);
     }
   }
@@ -97,24 +123,26 @@ const bookingSlice = createSlice({
   name: 'booking',
   initialState,
   reducers: {
+    setBookings: (state, action) => {
+      state.bookings = action.payload;
+      state.status = 'succeeded';
+    },
     clearBookingError: (state) => {
       state.error = null;
-    },
+    }
   },
   extraReducers: (builder) => {
     builder
       .addCase(createBooking.pending, (state) => {
         state.status = 'loading';
-        state.error = null;
       })
       .addCase(createBooking.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.error = null;
-        state.bookings.push(action.payload); // Add new booking to the state
+        state.bookings.push(action.payload);
       })
       .addCase(createBooking.rejected, (state, action) => {
         state.status = 'failed';
-        state.error = action.payload;
+        state.error = action.error.message;
       })
       .addCase(fetchUserBookings.pending, (state) => {
         state.status = 'loading';
@@ -143,7 +171,7 @@ const bookingSlice = createSlice({
   },
 });
 
-export const { clearBookingError } = bookingSlice.actions;
+export const { setBookings, clearBookingError } = bookingSlice.actions;
 
 export const selectBookingStatus = (state) => state.booking.status;
 export const selectBookingError = (state) => state.booking.error;
